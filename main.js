@@ -7,13 +7,58 @@ var csv_data_string;
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
 
-function main() {
+var pressedKeys = [];
 
-    let dayOfYear = 200;
+var cameraRotation = [0,2];
 
-    let t_eph = 2024 + dayOfYear/356;
+
+function inputHandler(deltT){
+    if(pressedKeys.includes("ArrowRight")){
+        cameraRotation[1] = (cameraRotation[1] + 1 * deltT);
+    }
+    if(pressedKeys.includes("ArrowLeft")){
+        cameraRotation[1] = (cameraRotation[1] - 1 * deltT);
+    }
+    //vertical
+    if(pressedKeys.includes("ArrowUp")){
+        cameraRotation[0] = (cameraRotation[0] + 1 * deltT)
+    }
+    if(pressedKeys.includes("ArrowDown")){
+        cameraRotation[0] = (cameraRotation[0] - 1 * deltT);
+    }
 
     
+
+    while(cameraRotation[1] < 0.0){
+        cameraRotation[1] += (Math.PI * 2.0);
+    }
+    while(cameraRotation[0] < 0.0){
+        cameraRotation[0] += (Math.PI * 2.0);
+    }
+    while(cameraRotation[1] > (Math.PI*2.0)){
+        cameraRotation[1] -= (Math.PI * 2.0);
+    }
+    while(cameraRotation[0] > (Math.PI*2.0)){
+        cameraRotation[0] -= (Math.PI * 2.0);
+    }
+
+}
+
+function main() {
+
+    document.addEventListener('keydown', (event) => {
+        const keyName = event.key;
+        if(!pressedKeys.includes(keyName)) {
+            pressedKeys.push(keyName);
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        const keyName = event.key;
+        while(pressedKeys.includes(keyName)) {
+            pressedKeys.pop(keyName);
+        }
+    }); 
 
     let csv_data_array = CSVToArray(csv_data_string);
     csv_data_array = csv_data_array.slice(1,csv_data_array.length-1 );
@@ -131,9 +176,10 @@ function main() {
     const t0_array = new Float32Array(
         ids.map(i => [transposed_data_array[13][i], 0, 0, 0]).flat());
     const albedo_array = new Float32Array(
-        ids.map(i => [transposed_data_array[3][i], 0, 0, 0]).flat());
-    const diameter_array = new Float32Array(
         ids.map(i => [transposed_data_array[11][i], 0, 0, 0]).flat());
+        //ids.map(i => [0, 0, 1, 0]).flat());
+    const diameter_array = new Float32Array(
+        ids.map(i => [transposed_data_array[3][i], 0, 0, 0]).flat());
 
     function createTexture(gl, data, width, height) {
         const tex = gl.createTexture();
@@ -199,14 +245,18 @@ function main() {
     let globalTime = 0.1;
     let globalDate = new Date('2024-10-05T19:59:34');
     function render(time) {
+
+        
     // convert to seconds
     time *= 0.001;
     // Subtract the previous time from the current time
     const deltaTime = time - then;
     globalTime += deltaTime * 1.0;
-    globalDate = addDays(globalDate, 5000*deltaTime);
+    //globalDate = addDays(globalDate, 5000*deltaTime);
     // Remember the current time for the next frame.
     then = time;
+
+    inputHandler(deltaTime);
 
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
@@ -262,7 +312,7 @@ function main() {
     gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
     gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
     gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate) - 2451545.0)/36525.0);
-    console.log("globalTime: "+ (toJulianDay(globalDate) - 2451545.0)/36525.0);
+    console.log("cameraRotation "+ cameraRotation );
     gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -283,7 +333,11 @@ function main() {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, planetPositionInfo.tex);
-
+    gl.activeTexture(gl.TEXTURE0 + 1);
+    gl.bindTexture(gl.TEXTURE_2D, albedoTex);
+    gl.activeTexture(gl.TEXTURE0 + 2);
+    gl.bindTexture(gl.TEXTURE_2D, diameterTex);
+    
     gl.useProgram(drawParticlesProgram);
     gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexWidth);
     gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
@@ -293,7 +347,11 @@ function main() {
         drawParticlesProgLocs.matrix,
         false,
         m4.multiply(
-            m4.perspective(Math.PI/2, gl.canvas.width/gl.canvas.height, 0.001, 1000), m4.axisRotation([0,1,0], globalTime*0.1) ));
+        m4.multiply(
+            m4.perspective(Math.PI/2, gl.canvas.width/gl.canvas.height, 0.001, 10000),
+                m4.axisRotation([0,1,0], cameraRotation[1] )), 
+                m4.axisRotation([1,0,0], cameraRotation[0])
+        ))  ;
         //m4.orthographic(0, gl.canvas.width, 0, gl.canvas.height, -1, 1));
 
     gl.drawArrays(gl.POINTS, 0, numParticles);
