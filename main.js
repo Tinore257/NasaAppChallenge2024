@@ -86,7 +86,7 @@ function main() {
     const particleTexHeight = 100;
     const numParticles = particleTexWidth * particleTexHeight;
     const ids = new Array(numParticles).fill(0).map((_, i) => i);
-    const idBuffer = gl.createBuffer();
+    const idBuffer = gl.createBuffer(); 
     gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ids), gl.STATIC_DRAW);
 
