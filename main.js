@@ -6,36 +6,6 @@ var csv_data_string;
 
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
-/*
-function calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, t) {
-    // Constants
-    const DEG_TO_RAD = Math.PI / 180;
-
-    // Mean anomaly at time t
-    let M = M0 + n * (t - t0);
-
-    // Solve Kepler's equation for Eccentric Anomaly E
-    let E = M;
-    let deltaE;
-    do {
-        deltaE = (M - (E - e * Math.sin(E))) / (1 - e * Math.cos(E));
-        E += deltaE;
-    } while (Math.abs(deltaE) > 1e-6);
-
-    // True anomaly ν
-    let ν = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
-
-    // Heliocentric distance r
-    let r = a * (1 - e * Math.cos(E));
-
-    // Heliocentric coordinates
-    let x = r * (Math.cos(node) * Math.cos(peri + ν) - Math.sin(node) * Math.sin(peri + ν) * Math.cos(i));
-    let y = r * (Math.sin(node) * Math.cos(peri + ν) + Math.cos(node) * Math.sin(peri + ν) * Math.cos(i));
-    let z = r * (Math.sin(peri + ν) * Math.sin(i));
-
-    return { x: x, y: y, z: z };
-}*/
-
 
 function main() {
 
@@ -51,27 +21,7 @@ function main() {
     let transposed_data_array = csv_data_array[0].map((_, colIndex) => csv_data_array.map(row => row[colIndex]));
 
     //"spkid","full_name","name","diameter","e","a","q","i","om"(),"w" (peri),"ma","albedo","n","epoch"
-    // Example usage
-    let e = parseFloat(transposed_data_array[4][0]); // Eccentricity
-    let a = parseFloat(transposed_data_array[5][0]); // Semi-major axis in AU
-    let q = parseFloat(transposed_data_array[6][0]) // Perihelion distance in AU
-    let i = parseFloat(transposed_data_array[7][0]); // Inclination in degrees
-    let node = parseFloat(transposed_data_array[8][0]); // Longitude of the ascending node in degrees
-    let peri = parseFloat(transposed_data_array[9][0]); // Argument of perihelion in degrees
-    let M0 = parseFloat(transposed_data_array[10][0]); // Mean anomaly at epoch in degrees
-    let n = parseFloat(transposed_data_array[12][0]); // Mean motion in degrees per day
-    let t0 = parseFloat(transposed_data_array[13][0]); // Epoch in Julian days
-    //let t = parseFloat(transposed_data_array[13][0]); // Given timestamp in Julian days
-
-    
-    /*
-    for (let day = 0; day < 365; day++){
-        let t_temp = ((2024 + 365/day == 0? 1 : day) - 2451545.0)/36525; 
-        let position = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, t_temp);
-        console.log(position);
-    }*/
-
-
+   
     const updatePositionVS = computeVertexShader;
 
     const updatePositionFS = computeFragmentShader;
@@ -180,6 +130,10 @@ function main() {
         ids.map(i => [transposed_data_array[12][i], 0, 0, 0]).flat());
     const t0_array = new Float32Array(
         ids.map(i => [transposed_data_array[13][i], 0, 0, 0]).flat());
+    const albedo_array = new Float32Array(
+        ids.map(i => [transposed_data_array[3][i], 0, 0, 0]).flat());
+    const diameter_array = new Float32Array(
+        ids.map(i => [transposed_data_array[11][i], 0, 0, 0]).flat());
 
     function createTexture(gl, data, width, height) {
         const tex = gl.createTexture();
@@ -214,6 +168,9 @@ function main() {
     const nTex = createTexture(gl, n_array, particleTexWidth, particleTexHeight);
     const t0Tex = createTexture(gl, t0_array, particleTexWidth, particleTexHeight);
     const positionTex1 = createTexture(gl, positions, particleTexWidth, particleTexHeight);
+
+    const albedoTex = createTexture(gl, albedo_array, particleTexWidth, particleTexHeight);
+    const diameterTex = createTexture(gl, diameter_array, particleTexWidth, particleTexHeight);
 
     function createFramebuffer(gl, tex) {
     const fb = gl.createFramebuffer();
@@ -330,6 +287,8 @@ function main() {
     gl.useProgram(drawParticlesProgram);
     gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexWidth);
     gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
+    gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
+    gl.uniform1i(drawParticlesProgLocs.diameterTex, 2)
     gl.uniformMatrix4fv(
         drawParticlesProgLocs.matrix,
         false,

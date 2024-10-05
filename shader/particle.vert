@@ -16,11 +16,12 @@ const particleVertexShader =  `
     void main() {
     // pull the position from the texture
     vec4 position = getValueFrom2DTextureAs1DArray(positionTex, texDimensions, id);
+    float diameter = getValueFrom2DTextureAs1DArray(diameterTex, texDimensions, id).x;
 
     // do the common matrix math
     //gl_Position = matrix * vec4(position.xy, 0, 1);
     gl_Position = matrix * vec4(position.xyz, 1.0);
-    gl_PointSize = 4.0;
+    gl_PointSize = max(diameter * 5.0, 1.0 );
     }
 `;
 
