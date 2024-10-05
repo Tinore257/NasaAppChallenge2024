@@ -96,7 +96,7 @@
   
   cursor: pointer;
   transition: background-color 0.3s;
-  bottom: -115px;
+  bottom: -76px;
   right: -3px;
   position: relative;
   
@@ -145,19 +145,26 @@
             right: 100px;}
             #label3 {top: 150px;
             right: 100px;}
-            
+           
+             #errorMessage {
+            	
+            	color: red;
+            	text-shadow: none;
+  position: relative;
+  bottom: -100px;
+  }
             
              #budget {
              	right: 130px;
   		position: relative;
-  		bottom: -110px;
+  		bottom: -66px;
             	color: green;
             	text-shadow: none;}
              #cost {
             	right: -100px;
             	text-shadow: none;
   position: relative;
-  bottom: -147px;
+  bottom: -103px;
   color: red;}
              
            
@@ -199,7 +206,7 @@
     <label for="rotation"class="label"  id="label2">Rotation:</label>
     <input type="range" id="rotation" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
     
-    
+    <p id="errorMessage"> </p>
 	<p id="cost">Cost: </p><p id="budget">$$100000000</p>
 	 <button  onclick="launchRocket()" class="rounded-button" id="actionButton">Launch</button>
 
@@ -229,17 +236,16 @@
   function calculateCost(){
   
    var currentValue = speedSlider.value; // Get the current value of the slider
-   console.log(currentValue);
-   console.log();
-   		var cost1 =  10000 * (currentValue + 3);
+  
+   		var cost1 =  10000 * (currentValue + 2);
    		console.log(cost1);
             cost.textContent = "Cost:" + cost1 + "$"; 
-            console.log(cost);
+            
            
             }
   
   function setNewBudget(){
-  	var budget =  parseInt(document.getElementById('budget').innerHTML) - parseInt(document.getElementById('cost').innerHTML);
+  	var budget =  parseInt(document.getElementById('budget').innerHTML.substring(2)) - parseInt(document.getElementById('cost').innerHTML.substring(5));
   	var budgetString = "$$" + budget;
   	document.getElementById('budget').textContent = budgetString;
   	
@@ -250,17 +256,24 @@
   
    
    function updateValue() {
+    errorMessage.textContent = "";
    	calculateCost();
    }
    
    
    
    function launchRocket(){
-   	
+    
+    console.log(parseInt(cost.innerHTML.substring(5)));
+    console.log(parseInt(budget.innerHTML.substring(2)));
+   	if(parseInt(cost.innerHTML.substring(5)) < parseInt(budget.innerHTML.substring(2))){
    	const speedValue = document.getElementById('speed').value;
    	const rotationValue = document.getElementById('rotation').value;
+     setNewBudget();
+  }else{
+    errorMessage.textContent = "insufficient funds";
+  }
    	
-   	setNewBudget();
    	
    	
    }
