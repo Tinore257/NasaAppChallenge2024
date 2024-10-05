@@ -6,6 +6,7 @@ var csv_data_string;
 
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
+/*
 function calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, t) {
     // Constants
     const DEG_TO_RAD = Math.PI / 180;
@@ -33,7 +34,7 @@ function calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, t) {
     let z = r * (Math.sin(peri + ν) * Math.sin(i));
 
     return { x: x, y: y, z: z };
-}
+}*/
 
 
 function main() {
@@ -63,12 +64,12 @@ function main() {
     //let t = parseFloat(transposed_data_array[13][0]); // Given timestamp in Julian days
 
     
-
+    /*
     for (let day = 0; day < 365; day++){
         let t_temp = ((2024 + 365/day == 0? 1 : day) - 2451545.0)/36525; 
         let position = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, t_temp);
         console.log(position);
-    }
+    }*/
 
 
     const updatePositionVS = computeVertexShader;
@@ -109,10 +110,18 @@ function main() {
     const drawParticlesProgram = webglUtils.createProgramFromSources(
         gl, [drawParticlesVS, drawParticlesFS]);
 
+    //e, a, q ,i ,node, peri ,M0 ,n , t0
     const updatePositionPrgLocs = {
     position: gl.getAttribLocation(updatePositionProgram, 'position'),
-    positionTex: gl.getUniformLocation(updatePositionProgram, 'positionTex'),
-    velocityTex: gl.getUniformLocation(updatePositionProgram, 'velocityTex'),
+    eTex: gl.getUniformLocation(updatePositionProgram, 'eTex'),
+    aTex: gl.getUniformLocation(updatePositionProgram, 'aTex'),
+    qTex: gl.getUniformLocation(updatePositionProgram, 'qTex'),
+    iTex: gl.getUniformLocation(updatePositionProgram, 'iTex'),
+    nodeTex: gl.getUniformLocation(updatePositionProgram, 'nodeTex'),
+    periTex: gl.getUniformLocation(updatePositionProgram, 'periTex'),
+    M0Tex: gl.getUniformLocation(updatePositionProgram, 'M0Tex'),
+    nTex: gl.getUniformLocation(updatePositionProgram, 'nTex'),
+    t0Tex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
     texDimensions: gl.getUniformLocation(updatePositionProgram, 'texDimensions'),
     canvasDimensions: gl.getUniformLocation(updatePositionProgram, 'canvasDimensions'),
     deltaTime: gl.getUniformLocation(updatePositionProgram, 'deltaTime'),
@@ -121,6 +130,8 @@ function main() {
     const drawParticlesProgLocs = {
     id: gl.getAttribLocation(drawParticlesProgram, 'id'),
     positionTex: gl.getUniformLocation(drawParticlesProgram, 'positionTex'),
+    albedoTex: gl.getUniformLocation(drawParticlesProgram, 'albedoTex'),
+    diameterTex: gl.getUniformLocation(drawParticlesProgram, 'diameterTex'),
     texDimensions: gl.getUniformLocation(drawParticlesProgram, 'texDimensions'),
     matrix: gl.getUniformLocation(drawParticlesProgram, 'matrix'),
     };
@@ -129,18 +140,11 @@ function main() {
     // setup a full canvas clip space quad
     const updatePositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, updatePositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-    -1, -1,
-        1, -1,
-    -1,  1,
-    -1,  1,
-        1, -1,
-        1,  1,
-    ]), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1,  1, -1,  1,  1, -1, 1,  1,]), gl.STATIC_DRAW);
 
     // setup an id buffer
-    const particleTexWidth = 100;
-    const particleTexHeight = 100;
+    const particleTexWidth = 10;
+    const particleTexHeight = 10;
     const numParticles = particleTexWidth * particleTexHeight;
     const ids = new Array(numParticles).fill(0).map((_, i) => i);
     const idBuffer = gl.createBuffer(); 
@@ -152,44 +156,64 @@ function main() {
     // to the initial size we want
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
-    // create random positions and velocities.
-    const rand = (min, max) => {
-    if (max === undefined) {
-        max = min;
-        min = 0;
-    }
-    return Math.random() * (max - min) + min;
-    };
+
+    // e 4, a 5, q 6, i 7, node 8, peri 9, M0 10, n 12,  t0 13
+
     const positions = new Float32Array(
-        ids.map(_ => [rand(canvas.width), rand(canvas.height), 0, 0]).flat());
-    const velocities = new Float32Array(
-        ids.map(_ => [rand(-300, 300), rand(-300, 300), 0, 0]).flat());
+        ids.map(_ => [0.5, 0.5, 0, 0]).flat());
+    //e, a, q ,i ,node, peri ,M0 ,n , t0
+    const e_array = new Float32Array(
+        ids.map(i => [transposed_data_array[4][i], 0, 0, 0]).flat());
+    const a_array = new Float32Array(
+        ids.map(i => [transposed_data_array[5][i], 0, 0, 0]).flat());
+    const q_array = new Float32Array(
+        ids.map(i => [transposed_data_array[6][i], 0, 0, 0]).flat());
+    const i_array = new Float32Array(
+        ids.map(i => [transposed_data_array[7][i], 0, 0, 0]).flat());
+    const node_array = new Float32Array(
+        ids.map(i => [transposed_data_array[8][i], 0, 0, 0]).flat());
+    const peri_array = new Float32Array(
+        ids.map(i => [transposed_data_array[9][i], 0, 0, 0]).flat());
+    const M0_array = new Float32Array(
+        ids.map(i => [transposed_data_array[10][i], 0, 0, 0]).flat());
+    const n_array = new Float32Array(
+        ids.map(i => [transposed_data_array[12][i], 0, 0, 0]).flat());
+    const t0_array = new Float32Array(
+        ids.map(i => [transposed_data_array[13][i], 0, 0, 0]).flat());
 
     function createTexture(gl, data, width, height) {
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,        // mip level
-        gl.RGBA,  // internal format
-        width,
-        height,
-        0,        // border
-        gl.RGBA,  // format
-        gl.FLOAT, // type
-        data,
-    );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    return tex;
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,        // mip level
+            gl.RGBA,  // internal format
+            width,
+            height,
+            0,        // border
+            gl.RGBA,  // format
+            gl.FLOAT, // type
+            data,
+        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return tex;
     }
 
+    //e, a, q ,i ,node, peri ,M0 ,n , t0
     // create a texture for the velocity and 2 textures for the positions.
-    const velocityTex = createTexture(gl, velocities, particleTexWidth, particleTexHeight);
+    const eTex = createTexture(gl, e_array, particleTexWidth, particleTexHeight);
+    const aTex = createTexture(gl, a_array, particleTexWidth, particleTexHeight);
+    const qTex = createTexture(gl, q_array, particleTexWidth, particleTexHeight);
+    const iTex = createTexture(gl, i_array, particleTexWidth, particleTexHeight);
+    const nodeTex = createTexture(gl, node_array, particleTexWidth, particleTexHeight);
+    const periTex = createTexture(gl, peri_array, particleTexWidth, particleTexHeight);
+    const M0Tex = createTexture(gl, M0_array, particleTexWidth, particleTexHeight);
+    const nTex = createTexture(gl, n_array, particleTexWidth, particleTexHeight);
+    const t0Tex = createTexture(gl, t0_array, particleTexWidth, particleTexHeight);
     const positionTex1 = createTexture(gl, positions, particleTexWidth, particleTexHeight);
-    const positionTex2 = createTexture(gl, null, particleTexWidth, particleTexHeight);
 
     function createFramebuffer(gl, tex) {
     const fb = gl.createFramebuffer();
@@ -202,30 +226,35 @@ function main() {
     // and another that renders to positionTex2
 
     const positionsFB1 = createFramebuffer(gl, positionTex1);
-    const positionsFB2 = createFramebuffer(gl, positionTex2);
-
-    let oldPositionsInfo = {
-    fb: positionsFB1,
-    tex: positionTex1,
+    //const positionsFB2 = createFramebuffer(gl, positionTex2);
+    
+    let planetPositionInfo = {
+        fb: positionsFB1,
+        tex: positionTex1,
     };
+    /*
     let newPositionsInfo = {
     fb: positionsFB2,
     tex: positionTex2,
-    };
+    };*/
 
     let then = 0;
+    let globalTime = 0.1;
+    let globalDate = new Date('2024-10-05T19:59:34');
     function render(time) {
     // convert to seconds
     time *= 0.001;
     // Subtract the previous time from the current time
     const deltaTime = time - then;
+    globalTime += deltaTime * 1.0;
+    globalDate = addDays(globalDate, 5000*deltaTime);
     // Remember the current time for the next frame.
     then = time;
 
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
     // render to the new positions
-    gl.bindFramebuffer(gl.FRAMEBUFFER, newPositionsInfo.fb);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, planetPositionInfo.fb);
     gl.viewport(0, 0, particleTexWidth, particleTexHeight);
 
     // setup our attributes to tell WebGL how to pull
@@ -243,18 +272,40 @@ function main() {
         0,         // offset
     );
 
+    //e, a, q ,i ,node, peri ,M0 ,n , t0
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, oldPositionsInfo.tex);
+    gl.bindTexture(gl.TEXTURE_2D, eTex);
     gl.activeTexture(gl.TEXTURE0 + 1);
-    gl.bindTexture(gl.TEXTURE_2D, velocityTex);
+    gl.bindTexture(gl.TEXTURE_2D, aTex);
+    gl.activeTexture(gl.TEXTURE0 + 2);
+    gl.bindTexture(gl.TEXTURE_2D, qTex);
+    gl.activeTexture(gl.TEXTURE0 + 3);
+    gl.bindTexture(gl.TEXTURE_2D, iTex);
+    gl.activeTexture(gl.TEXTURE0 + 4);
+    gl.bindTexture(gl.TEXTURE_2D, nodeTex);
+    gl.activeTexture(gl.TEXTURE0 + 5);
+    gl.bindTexture(gl.TEXTURE_2D, periTex);
+    gl.activeTexture(gl.TEXTURE0 + 6);
+    gl.bindTexture(gl.TEXTURE_2D, M0Tex);
+    gl.activeTexture(gl.TEXTURE0 + 7);
+    gl.bindTexture(gl.TEXTURE_2D, nTex);
+    gl.activeTexture(gl.TEXTURE0 + 8);
+    gl.bindTexture(gl.TEXTURE_2D, t0Tex);
 
     gl.useProgram(updatePositionProgram);
-    gl.uniform1i(updatePositionPrgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
-    gl.uniform1i(updatePositionPrgLocs.velocityTex, 1);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.eTex, 0);  // tell the shader the position texture is on texture unit 0
+    gl.uniform1i(updatePositionPrgLocs.aTex, 1);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.qTex, 2);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.iTex, 3);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.nodeTex, 4);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.periTex, 5);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.M0Tex, 6);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.nTex, 7);  // tell the shader the position texture is on texture unit 1
+    gl.uniform1i(updatePositionPrgLocs.t0Tex, 8);  // tell the shader the position texture is on texture unit 1
     gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
     gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
-    gl.uniform1f(updatePositionPrgLocs.deltaTime, deltaTime);
-
+    gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate) - 2451545.0)/36525.0);
+    console.log("globalTime: "+ (toJulianDay(globalDate) - 2451545.0)/36525.0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -274,7 +325,7 @@ function main() {
     );
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, newPositionsInfo.tex);
+    gl.bindTexture(gl.TEXTURE_2D, planetPositionInfo.tex);
 
     gl.useProgram(drawParticlesProgram);
     gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexWidth);
@@ -282,17 +333,19 @@ function main() {
     gl.uniformMatrix4fv(
         drawParticlesProgLocs.matrix,
         false,
-        m4.orthographic(0, gl.canvas.width, 0, gl.canvas.height, -1, 1));
+        m4.multiply(
+            m4.perspective(Math.PI/2, gl.canvas.width/gl.canvas.height, 0.001, 1000), m4.axisRotation([0,1,0], globalTime*0.1) ));
+        //m4.orthographic(0, gl.canvas.width, 0, gl.canvas.height, -1, 1));
 
     gl.drawArrays(gl.POINTS, 0, numParticles);
 
     // swap which texture we will read from
     // and which one we will write to
-    {
+    /*{
         const temp = oldPositionsInfo;
         oldPositionsInfo = newPositionsInfo;
         newPositionsInfo = temp;
-    }
+    }*/
 
     requestAnimationFrame(render);
     }

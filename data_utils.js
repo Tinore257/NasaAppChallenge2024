@@ -1,3 +1,18 @@
+function toJulianDay(date) {
+    const JD_JAN_1_1970 = 2440587.5; // Julian Day for January 1, 1970
+    const msInDay = 86400000; // Number of milliseconds in a day
+
+    return JD_JAN_1_1970 + (date.getTime() / msInDay);
+}
+
+function addDays(date, days) {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+
+
 // ref: http://stackoverflow.com/a/1293163/2343
 // This will parse a delimited string into an array of
 // arrays. The default delimiter is the comma, but this

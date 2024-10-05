@@ -1,8 +1,20 @@
 const computeFragmentShader =  `
   precision highp float;
 
-    uniform sampler2D positionTex;
-    uniform sampler2D velocityTex;
+/* eTex ,aTex, qTex, iTex, nodeTex, periTex, M0Tex, nTex, t0Tex
+*/
+
+
+    uniform sampler2D eTex;
+    uniform sampler2D aTex;
+    uniform sampler2D qTex;
+    uniform sampler2D iTex;
+    uniform sampler2D nodeTex;
+    uniform sampler2D periTex;
+    uniform sampler2D M0Tex;
+    uniform sampler2D nTex;
+    uniform sampler2D t0Tex;
+
     uniform vec2 texDimensions;
     uniform vec2 canvasDimensions;
     uniform float deltaTime;
@@ -10,7 +22,7 @@ const computeFragmentShader =  `
     vec3 calculatePlanetPosition(float e, float a, float q, float i, float node, float peri, float M0, float n, float t0, float t) {
 
       // Mean anomaly at time t
-      float M = M0 + n * (t - t0);
+      float M = M0 + n * (t);
 
       // Solve Kepler's equation for Eccentric Anomaly E
       float E = M;
@@ -19,19 +31,19 @@ const computeFragmentShader =  `
         if(abs(deltaE) < 1e-6){
           break;
         }
-        deltaE = (M - (E - e * Math.sin(E))) / (1 - e * Math.cos(E));
+        deltaE = (M - (E - e * sin(E))) / (1.0 - e * cos(E));
         E += deltaE;
       }
       // True anomaly ν
-      float ν = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+      float v = 2.0 * atan((sqrt(1.0 + e) * sin(E / 2.0)), (sqrt(1.0 - e) * cos(E / 2.0)));
 
       // Heliocentric distance r
-      float r = a * (1 - e * Math.cos(E));
+      float r = a * (1.0 - e * cos(E));
 
       // Heliocentric coordinates
-      float x = r * (Math.cos(node) * Math.cos(peri + ν) - Math.sin(node) * Math.sin(peri + ν) * Math.cos(i));
-      float y = r * (Math.sin(node) * Math.cos(peri + ν) + Math.cos(node) * Math.sin(peri + ν) * Math.cos(i));
-      float z = r * (Math.sin(peri + ν) * Math.sin(i));
+      float x = r * (cos(node) * cos(peri + v) - sin(node) * sin(peri + v) * cos(i));
+      float y = r * (sin(node) * cos(peri + v) + cos(node) * sin(peri + v) * cos(i));
+      float z = r * (sin(peri + v) * sin(i));
 
       return vec3(x, y, z);
   }
@@ -51,10 +63,17 @@ const computeFragmentShader =  `
     // compute texcoord from gl_FragCoord;
     vec2 texcoord = gl_FragCoord.xy / texDimensions;
 
-    vec2 position = texture2D(positionTex, texcoord).xy;
-    vec2 velocity = texture2D(velocityTex, texcoord).xy;
-    vec2 newPosition = position;
+    float e = texture2D(eTex, texcoord).x;
+    float a = texture2D(aTex, texcoord).x;
+    float q = texture2D(qTex, texcoord).x;
+    float i = texture2D(iTex, texcoord).x;
+    float node = texture2D(nodeTex, texcoord).x;
+    float peri = texture2D(periTex, texcoord).x;
+    float M0 = texture2D(M0Tex, texcoord).x;
+    float n = texture2D(nTex, texcoord).x;
+    float t0 = texture2D(t0Tex, texcoord).x;
 
-    gl_FragColor = vec4(newPosition, 0, 1);
+    vec3 pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, deltaTime);
+    gl_FragColor = vec4(pos, 1.0);
     }
 `;
