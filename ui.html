@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layering HTML over Canvas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Set the canvas and container to relative positioning */
+    body {
+            font-family: 'Orbitron', sans-serif !important;
+            color: orange;
+            text-shadow: 0 0 10px rgba(255, 165, 0, 0.8), /* Inner glow */
+                         0 0 20px rgba(255, 165, 0, 1),   /* Outer glow */
+                         0 0 30px rgba(255, 165, 0, 1); 
+        }
+    .container {
+      position: relative;
+      width: 500px;
+      height: 300px;
+    }
+
+    /* Position the canvas */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1; /* Canvas is below */
+    }
+    
+      .glowing-border {
+            border: 5px solid orange; /* Orange solid border */
+            padding: 20px;
+            text-align: center;
+            /* Glow effect using box-shadow */
+            box-shadow: 0 0 20px 10px rgba(255, 165, 0, 0.7); /* Glowing effect */
+        }
+    
+     .rounded-rectangle {
+            width: 500px; /* Width of the rectangle */
+            height: 300px; /* Height of the rectangle */
+            background-color: black; /* Background color */
+            border-radius: 10px; /* Rounding of edges (the higher the value, the more rounded it is) */
+          opacity: 0.8;
+            z-index: 2; 
+            position: absolute;
+            
+             border: 5px solid orange; /* Orange solid border */
+           
+           
+            /* Glow effect using box-shadow */
+            box-shadow: 0 0 20px 10px rgba(255, 165, 0, 0.7);
+        }
+
+
+    /* Layered HTML element */
+    .overlay-text {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 3; /* This will appear on top */
+      color: white;
+      background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .slider {
+            position: absolute;
+            top: 50px;
+            left: 100px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            z-index: 2; /* Higher z-index than the canvas */
+            border: 1px solid #000;
+        }
+        .label{ z-index: 2;
+        	
+        	
+            	top: 50px;
+            	right: 100px;
+            	position: absolute;
+            	}
+            	
+        .rounded-button {
+        
+        
+        	
+        	
+  width: 200px;
+  height: 45px;
+
+  border: 2px solid orange;
+
+  
+  
+  cursor: pointer;
+  transition: background-color 0.3s;
+  bottom: -115px;
+  right: -3px;
+  position: relative;
+  
+  background-color: transparent; /* Button background color */
+            color: orange; /* Text color */
+            padding: 15px 30px; /* Padding for size */
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 5px; /* Rounded corners */
+            font-size: 18px; /* Font size */
+            cursor: pointer; /* Pointer on hover */
+            transition: box-shadow 0.3s ease; /* Smooth transition for shadow */
+            text-align: center;
+}
+            
+        h1{ font-size: 16px; }
+        h3{padding-left: 30px; }
+        ul {
+        padding-left: 30px; 
+            list-style-type: none; /* No bullet points */
+            /* Remove default padding */
+        }
+
+        /* Optional: Style the list items for better spacing */
+        li {
+            margin: 10px 0; /* Add margin for spacing between items */
+        }
+        
+        
+
+        .rounded-button:hover {
+            
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.7), 0 0 30px rgba(255, 165, 0, 1); /* Orange glow */
+        
+        }
+            	
+        #speed {top: 50px;
+            right: 100px;}
+        #rotation {top: 100px;
+            right: 100px;}
+        #slider3 {top: 150px;
+             right: 100px;}
+             
+             #label1 {top: 50px;
+            right: 100px;}
+            #label2 {top: 100px;
+            right: 100px;}
+            #label3 {top: 150px;
+            right: 100px;}
+            
+            
+             #budget {
+             	right: 146px;
+  		position: relative;
+  		bottom: -110px;
+            	color: green;
+            	text-shadow: none;}
+             #cost {
+            	right: -65px;
+            	text-shadow: none;
+  position: relative;
+  bottom: -147px;
+  color: red;}
+             
+           
+            
+        #rectangle1 {top: 50px;
+            	left: 100px;
+            	 width: 300px; /* Width of the rectangle */
+            height: 300px;
+            	position: fixed;}
+        #rectangle2 {
+        text-align: center;
+            	right: 100px;
+            	position: fixed;
+            	bottom: 0;}
+            
+            
+            
+  </style>
+</head>
+<body>
+ <canvas id="fullScreenCanvas"></canvas>
+ <div class="rounded-rectangle" id="rectangle1">
+ <h3>Mission Information:</h3>
+<ul>
+    <li>Dummy Asteroid Name:</li>
+    <li>Asteroid Speed:</li>
+    <li>Distance from Earth:</li>
+    <li>Asteroid Make Up:</li>
+</ul>
+ </div>
+
+  <!-- Canvas -->
+
+  <div class="rounded-rectangle" id="rectangle2">
+  <h1>Mission Control</h1>
+    <label for="speed"class="label" id="label1">Speed: </label>
+    <input type="range" id="speed" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
+   
+    <label for="rotation"class="label"  id="label2">Rotation:</label>
+    <input type="range" id="rotation" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
+    
+    <label for="slider3" class="label"  id="label3">Attribut:</label>
+     <input type="range" id="slider3" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
+	<p id="cost">Cost: </p><p id="budget">$$100000000</p>
+	 <button  onclick="launchRocket()" class="rounded-button" id="actionButton">Launch</button>
+
+</div>
+
+<script>
+	
+	 const speedSlider = document.getElementById('speed');
+	 const cost = document.getElementById('cost');
+	  const budget = document.getElementById('budget');
+	
+  const canvas = document.getElementById('fullScreenCanvas');
+  const ctx = canvas.getContext('2d');
+  speedSlider.addEventListener('input', updateValue);
+  
+
+  // Function to resize the canvas to full screen
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // Example drawing: fill the screen with a background color
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function calculateCost(){
+  
+   var currentValue = speedSlider.value; // Get the current value of the slider
+   console.log(currentValue);
+   console.log();
+   		var cost =  10000 * (currentValue + 3);
+   		console.log(cost);
+            cost.textContent = "cost:" + cost + "$"; 
+            console.log(cost);
+           
+            }
+  
+  function setNewBudget(){
+  	var budget =  parseInt(document.getElementById('budget').innerHTML) - parseInt(document.getElementById('cost').innerHTML);
+  	var budgetString = "$$" + budget;
+  	document.getElementById('budget').textContent = budgetString;
+  	
+  
+  };
+  
+  
+  
+   
+   function updateValue() {
+   	calculateCost();
+   }
+   
+   
+   
+   function launchRocket(){
+   	
+   	const speedValue = document.getElementById('speed').value;
+   	const rotationValue = document.getElementById('rotation').value;
+   	
+   	setNewBudget();
+   	
+   	
+   }
+   
+   function calculateWin(){
+   	var size;
+   	var modifier;
+   	var score;
+   	const basePriceValue = 10000;
+   	var win = size * modifier * score * basePriceValue;
+   	budget.textContent = "$$" + parseInt(budget.innerHtml) + win;
+   	
+   	
+   	
+   	
+   }
+   
+   
+
+  // Initial call to resize the canvas
+  resizeCanvas();
+
+  // Resize the canvas whenever the window is resized
+  window.addEventListener('resize', resizeCanvas);
+
+
+
+</script>
+
+
+
+</body>
+</html>
