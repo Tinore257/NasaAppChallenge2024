@@ -148,13 +148,13 @@
             
             
              #budget {
-             	right: 146px;
+             	right: 130px;
   		position: relative;
   		bottom: -110px;
             	color: green;
             	text-shadow: none;}
              #cost {
-            	right: -65px;
+            	right: -100px;
             	text-shadow: none;
   position: relative;
   bottom: -147px;
@@ -199,8 +199,7 @@
     <label for="rotation"class="label"  id="label2">Rotation:</label>
     <input type="range" id="rotation" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
     
-    <label for="slider3" class="label"  id="label3">Attribut:</label>
-     <input type="range" id="slider3" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
+    
 	<p id="cost">Cost: </p><p id="budget">$$100000000</p>
 	 <button  onclick="launchRocket()" class="rounded-button" id="actionButton">Launch</button>
 
@@ -232,9 +231,9 @@
    var currentValue = speedSlider.value; // Get the current value of the slider
    console.log(currentValue);
    console.log();
-   		var cost =  10000 * (currentValue + 3);
-   		console.log(cost);
-            cost.textContent = "cost:" + cost + "$"; 
+   		var cost1 =  10000 * (currentValue + 3);
+   		console.log(cost1);
+            cost.textContent = "Cost:" + cost1 + "$"; 
             console.log(cost);
            
             }
