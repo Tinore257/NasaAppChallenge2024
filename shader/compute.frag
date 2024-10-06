@@ -22,7 +22,7 @@ const computeFragmentShader =  `
     vec3 calculatePlanetPosition(float e, float a, float q, float i, float node, float peri, float M0, float n, float t0, float t) {
 
       // Mean anomaly at time t
-      float M = M0 + n * (t);
+      float M = M0 + n * (t) * (3.14159) / 180.0;
 
       // Solve Kepler's equation for Eccentric Anomaly E
       float E = M;

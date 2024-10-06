@@ -368,7 +368,7 @@ function main() {
     // Subtract the previous time from the current time
     const deltaTime = time - then;
     globalTime += deltaTime * 1.0;
-    globalDate = addDays(globalDate, 1000*deltaTime);
+    globalDate = addDays(globalDate, 1);
     console.log("Global-Date: " + globalDate);
     // Remember the current time for the next frame.
     then = time;
@@ -434,7 +434,7 @@ function main() {
         gl.uniform1i(updatePositionPrgLocs.t0Tex, 8);  // tell the shader the position texture is on texture unit 1
         gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
-        gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate) - 2451545.0)/36525.0);
+        gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate)));
         //console.log("cameraRotation "+ cameraRotation + " cameraDistance " + cameraDistance );
         //gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
         ext.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 6, 1);
@@ -517,7 +517,7 @@ function main() {
     //----------------------------------------------
     // Main sphere render call
     //----------------------------------------------
-    if(false){ 
+    if(true){ 
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
