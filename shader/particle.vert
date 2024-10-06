@@ -29,7 +29,8 @@ const particleVertexShader =  `
     //gl_Position = matrix * vec4(position.xy, 0, 1);
     v_albedo = albedo;
 
-    vec4 pos = V * vec4(a_position* diameter * 0.01 + position.xyz, 1.0);
+    float dia = max(0.001, diameter * (1.0/149597871.0));
+    vec4 pos = V * vec4(a_position*  dia + position.xyz, 1.0);
     
     gl_Position = P * pos;
 
