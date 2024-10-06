@@ -127,7 +127,7 @@
 
         /* Optional: Style the list items for better spacing */
         li {
-            margin: 10px 0; /* Add margin for spacing between items */
+            /*margin: 10px 0;  Add margin for spacing between items */
         }
         
         
@@ -137,6 +137,43 @@
             box-shadow: 0 0 15px rgba(255, 165, 0, 0.7), 0 0 30px rgba(255, 165, 0, 1); /* Orange glow */
         
         }
+
+        #chooseAsteroidContainer{
+          width: 100px;
+          height: 100px;
+          top: 50px;
+  right: 3px;
+          
+  position: relative;
+        }
+
+        #randomAsteroid{   text-align: center;
+          z-index: 2;
+          width: 160px;
+  height: 39px;
+  font-size: 10pt;
+  padding: 9px;
+  margin: none;
+  top: 20px;
+  right: 25px;
+          
+  position: fixed; }
+
+        #orbits{
+          text-align: center;
+          width: 140px;
+  height: 39px;
+  font-size: 10pt;
+  padding: 9px;
+  margin: none;
+  bottom: -12px;
+  right: 3px;
+          
+  position: relative;
+        }
+
+        
+        
             	
         #speedSlider {top: 50px;
             right: 100px;}
@@ -177,8 +214,8 @@
             
         #rectangle1 {top: 50px;
             	left: 100px;
-            	 width: 300px; /* Width of the rectangle */
-            
+            	 width: 393px; /* Width of the rectangle */
+              height: 218px;
             	position: fixed;}
         #rectangle2 {
         text-align: center;
@@ -404,7 +441,7 @@ width: 500px; /* Width of the rectangle */
 	var XC25 = new Trajectory("2010XC25",	1.74	, 3		,	237.1,	0.528	,	304.1	,	233		,	2.3	) ;
 	var TL10 = new Trajectory("2004TL10",	2.67	, 9.2	,	323.4,	0.654	,	11.5	,	129.7	,	4.35	) ;
 	var UW158 = new Trajectory("2011UW158",	1.62	, 4.6	,	8.6	,	0.375	,	286.3	,	253.7	,	2.06	) ;
-	var MyFancyAsteroid = new Trajectory("MyFancyAsteroid", 1.3	, 4.6	,	8.6	,	0.375	,	286.3	,	253.7	,	2.06);
+	var MyFancyAsteroid = new Trajectory("Millenium Falcon", 1.3	, 4.6	,	8.6	,	0.375	,	286.3	,	253.7	,	2.06);
 	
 	//http://www.stjarnhimlen.se/comp/ppcomp.html
 	var Moon = new Trajectory("theMoon",0.15,5.14,318.0634,0.0549006,125.1228,64,0.3) ;
@@ -417,7 +454,7 @@ width: 500px; /* Width of the rectangle */
 						 "1994PC1","2012SW20","2007PV27","2007TU24","2004XP14","2009KK","2007JY2","2002CU11","2000EK26","2001VK5",
 						 "2005YU55","2008DJ","2000QK130","1999JU3","2011SR5","1997XF11","2007RU9","Apophis", "2002NT7","2013ED28",
 						 "1993VB","2002NY40","2003CR20","2014PW59","2012TO139","1999JT6","2005LW3","1997XR2", "2011BT15","2004VC17",
-						 "2002EZ11","1993KH","2000EH26","2000TU28","2010SC41","1998OX4","2011DV","2010XC25","2004TL10","2011UW158", "MyFancyAsteroid"] ; 
+						 "2002EZ11","1993KH","2000EH26","2000TU28","2010SC41","1998OX4","2011DV","2010XC25","2004TL10","2011UW158", "Millenium Falcon"] ; 
 	//------------------------------------- end of global variables -----------------------------------------------------------------
 	
 	/*--------------------------------------------------------------------------------------------* 
@@ -926,7 +963,7 @@ width: 500px; /* Width of the rectangle */
 		addNode("2010XC25"	, 0.3, 0, 0,0.05) ;	
 		addNode("2004TL10"	, 0.3, 0, 0,0.05) ;	
 		addNode("2011UW158"	, 0.3, 0, 0,0.05) ;
-		addNode("MyFancyAsteroid"	, 0.5, 0.5, 0.0,0.1) ;	
+		addNode("Millenium Falcon"	, 0.5, 0.5, 0.0,0.05) ;	
 	
 		  for (var hB in asteroidLabels) {
 			  addLabel(asteroidLabels[hB]);
@@ -972,9 +1009,11 @@ width: 500px; /* Width of the rectangle */
 		<li>Distance from Earth:<b id="distance"></b></li>
 		<li>Minerals: <b id="minerals"></b></li>
 		<li id="reward">Approx. Reward </li>
-		<li><input type="button" id="orbits" value="Toggle Orbits" onclick="toggleOrbits();" /></li>
+		<li><input type="button" class="rounded-button" id="orbits" value="Toggle Orbits" onclick="toggleOrbits();" /></li>
 	</ul>
 	</div>
+
+  <div id="chooseAsteroidContainer"> <button id="randomAsteroid" class="rounded-button"  value="Random Asteroid" onclick="chooseAsteroid();"> Random Asteroid</button></div>
 
 <div class="rounded-rectangle" id="rectangle5" style="display: none;">
 	<h3>Mission Information:</h3>
