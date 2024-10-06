@@ -4,12 +4,17 @@
 
 var csv_data_string;
 
+
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
 
 var pressedKeys = [];
 
 var cameraRotation = [0,2];
+
+var cameraDistance = 1;
+
+
 
 
 function inputHandler(deltT){
@@ -25,6 +30,14 @@ function inputHandler(deltT){
     }
     if(pressedKeys.includes("ArrowDown")){
         cameraRotation[0] = (cameraRotation[0] - 1 * deltT);
+    }
+
+    //forward
+    if(pressedKeys.includes("w")){
+        cameraDistance = (cameraDistance + 1 * deltT * 5)
+    }
+    if(pressedKeys.includes("s")){
+        cameraDistance = (cameraDistance - 1 * deltT * 5);
     }
 
     
@@ -128,7 +141,9 @@ function main() {
     albedoTex: gl.getUniformLocation(drawParticlesProgram, 'albedoTex'),
     diameterTex: gl.getUniformLocation(drawParticlesProgram, 'diameterTex'),
     texDimensions: gl.getUniformLocation(drawParticlesProgram, 'texDimensions'),
-    matrix: gl.getUniformLocation(drawParticlesProgram, 'matrix'),
+    perspective: gl.getUniformLocation(drawParticlesProgram, 'P'),
+    view: gl.getUniformLocation(drawParticlesProgram, 'V'),
+    heightOfNearPlane: gl.getUniformLocation(drawParticlesProgram, 'heightOfNearPlane'),
     };
 
 
@@ -252,7 +267,7 @@ function main() {
     // Subtract the previous time from the current time
     const deltaTime = time - then;
     globalTime += deltaTime * 1.0;
-    //globalDate = addDays(globalDate, 5000*deltaTime);
+    globalDate = addDays(globalDate, 5000*deltaTime);
     // Remember the current time for the next frame.
     then = time;
 
@@ -312,7 +327,7 @@ function main() {
     gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
     gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
     gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate) - 2451545.0)/36525.0);
-    console.log("cameraRotation "+ cameraRotation );
+    console.log("cameraRotation "+ cameraRotation + " cameraDistance " + cameraDistance );
     gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -343,16 +358,36 @@ function main() {
     gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
     gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
     gl.uniform1i(drawParticlesProgLocs.diameterTex, 2)
+    let transl = m4.translation(...[0, 0, cameraDistance]);
+    
+    let view = 
+        m4.multiply(
+            m4.multiply(transl,
+            m4.axisRotation([1,0,0], cameraRotation[0]),
+            ),
+            m4.axisRotation([0,1,0], cameraRotation[1])
+        );
+    //perspective
     gl.uniformMatrix4fv(
-        drawParticlesProgLocs.matrix,
+        drawParticlesProgLocs.perspective,
         false,
-        m4.multiply(
-        m4.multiply(
-            m4.perspective(Math.PI/2, gl.canvas.width/gl.canvas.height, 0.001, 10000),
-                m4.axisRotation([0,1,0], cameraRotation[1] )), 
-                m4.axisRotation([1,0,0], cameraRotation[0])
-        ))  ;
-        //m4.orthographic(0, gl.canvas.width, 0, gl.canvas.height, -1, 1));
+        m4.perspective(Math.PI/2, gl.canvas.width/gl.canvas.height, 0.001, 10000)
+    );
+    //view
+    gl.uniformMatrix4fv(
+        drawParticlesProgLocs.view,
+        false,
+        view
+    );
+    let fovy = 90; // degrees
+    let viewport = gl.getParameter(gl.VIEWPORT);
+    let heightOfNearPlane = Math.abs(viewport[3]-viewport[1]) / (2*Math.tan(0.5*fovy*Math.PI/180.0));
+    //view
+    gl.uniform1f(
+        drawParticlesProgLocs.heightOfNearPlane,
+        false,
+        heightOfNearPlane
+    );
 
     gl.drawArrays(gl.POINTS, 0, numParticles);
 

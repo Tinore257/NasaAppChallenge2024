@@ -4,8 +4,11 @@ const particleVertexShader =  `
     uniform sampler2D albedoTex;
     uniform sampler2D diameterTex;
     uniform vec2 texDimensions;
-    uniform mat4 matrix;
+    uniform mat4 P;
+    uniform mat4 V;
+    uniform float heightOfNearPlane;
     varying vec3 v_albedo;
+    
 
     vec4 getValueFrom2DTextureAs1DArray(sampler2D tex, vec2 dimensions, float index) {
     float y = floor(index / dimensions.x);
@@ -20,12 +23,20 @@ const particleVertexShader =  `
     float diameter = getValueFrom2DTextureAs1DArray(diameterTex, texDimensions, id).x;
     vec3 albedo = getValueFrom2DTextureAs1DArray(albedoTex, texDimensions, id).xyz;
 
+    vec3 up = vec3(0,1,0);
     // do the common matrix math
     //gl_Position = matrix * vec4(position.xy, 0, 1);
     v_albedo = albedo;
-    gl_Position = matrix * vec4(position.xyz, 1.0);
-    float scaledDimater =  length(matrix * vec4(diameter,0, 0,0));
-    gl_PointSize = max(scaledDimater, 2.0 );
+
+    vec4 pos = V * vec4(position.xyz, 1.0);
+    gl_Position = P * pos;
+
+    //float scaledDimater = length(pos.xy-surfacePoint.xy);
+    //float scaledDimater = 1.0/ (length(position.xyz)* 1999);
+
+    gl_PointSize = (heightOfNearPlane * diameter)/ gl_Position.w;
+
+    //gl_PointSize = max(diameter * 1.0/abs(pos.z), 2.0 );
     }
 `;
 
