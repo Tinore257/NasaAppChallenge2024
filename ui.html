@@ -712,8 +712,8 @@ width: 500px; /* Width of the rectangle */
 		 // console.log (hBName + " trueAnomaly = " + trueAnomaly + "   true Anomaly  " + heavenlyBodies[hB].trueAnomoly + "  mean motion = " + n) ;
 		 // console.log(hBName + " eccentricity " + e + " true anomaly " + f + " Eccentric anomaly " + eA + " Mean anomaly " + m0 + " mean motion " + n) 	 
 		  }
-		  console.log('earth speed', vectorLength(heavenlyBodies[0].speed));
-		  console.log('rocket at', rocket_pos);
+		  //console.log('earth speed', vectorLength(heavenlyBodies[0].speed));
+		  //console.log('rocket at', rocket_pos);
 	
 		  let force = gravity(rocket_pos, rocket_mass, [0,0,0], sun_mass);
 		  //console.log('force', vectorLength(force));
@@ -746,7 +746,7 @@ width: 500px; /* Width of the rectangle */
 			document.getElementById('distance_rocket_earth').style.color = dist_to_earth < 0.5 ? 'green' : 'inherit';
 
 			document.getElementById('rocket_speed').textContent = Math.round(vectorLength(rocket_speed)) + 'km/s';
-			console.log(dist_to_asteroid, dist_to_earth)
+			//console.log(dist_to_asteroid, dist_to_earth)
 		  }
 	
 	
@@ -781,9 +781,11 @@ width: 500px; /* Width of the rectangle */
 			//	console.log('plane normal is', normal);
 			//	console.log('sun offset is', normal[0] * posA[0] + normal[1] * posA[1] + normal[2] * posA[2]);
 			//}
+			var omat = document.getElementById(heavenlyBodies[hB].name + "OrbitMat");
 			if (heavenlyBodies[hB].name === 'theEarth' || heavenlyBodies[hB].name === focusedAsteroid.name) {
+				omat.setAttribute("transparency",0) ;
 			} else {
-			 var omat = document.getElementById(heavenlyBodies[hB].name + "OrbitMat");
+			 
 			 omat.setAttribute("transparency",opacity) ;
 			}
 		   }
@@ -810,11 +812,14 @@ width: 500px; /* Width of the rectangle */
 		   }
 		}
 		function chooseAsteroid() {
+			let omat = document.getElementById(focusedAsteroid.name + 'OrbitMat');
+			omat.setAttribute("transparency",1) ;
 			chosenAsteroidNumber = Math.floor(Math.random()*asteroidLabels.length + 1)
 			
 			document.getElementById("asteroidName").textContent = heavenlyBodies[chosenAsteroidNumber].name;
 			focusedAsteroid = heavenlyBodies[chosenAsteroidNumber];
 			document.getElementById(focusedAsteroid.name + 'Mat').setAttribute("diffuseColor", 1.0 + " " + 0 + " " + 1.0 );
+			document.getElementById(focusedAsteroid.name + 'OrbitMat').setAttribute("transparency",0) ;
 			for (var hB in heavenlyBodies) {
 				if (heavenlyBodies[hB].name === chooseAsteroid) {
 					asteroidPlaneNormal = vectorNormalize(crossProduct(heavenlyBodies[hB].propagate(1), heavenlyBodies[hB].propagate(2.5)));
