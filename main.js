@@ -33,7 +33,7 @@ function inputHandler(deltT){
     }
 
     //forward
-    if(pressedKeys.includes("w")){
+    if(pressedKeys.includes("w") || pressedKeys.includes("p") ){
         cameraDistance = (cameraDistance + 1 * deltT * 5)
     }
     if(pressedKeys.includes("s")){
