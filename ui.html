@@ -132,7 +132,7 @@
         
         }
             	
-        #speed {top: 50px;
+        #speedSlider {top: 50px;
             right: 100px;}
         #rotation {top: 100px;
             right: 100px;}
@@ -201,11 +201,11 @@
 
   <div class="rounded-rectangle" id="rectangle2">
   <h1>Mission Control</h1>
-    <label for="speed"class="label" id="label1">Speed: </label>
-    <input type="range" id="speed" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
+    <label for="speedSlider"class="label" id="label1">Speed: </label>
+    <input type="range" id="speedSlider" class="slider" min="0" max="100" value="50" step="1">
    
     <label for="rotation"class="label"  id="label2">Rotation:</label>
-    <input type="range" id="rotation" class="slider" min="0" max="100" value="50" step="1" oninput="updateValue(this.value)">
+    <input type="range" id="rotation" class="slider" min="0" max="100" value="50" step="1">
     
     <p id="errorMessage"> </p>
 	<p id="cost">Cost: </p><p id="budget">$$100000000</p>
@@ -232,19 +232,26 @@
   mineralPairs.forEach(([key, value]) => {
   minerals.set(key, value);
 });
+const speedSlider = document.getElementById('speedSlider');
+	 const cost = document.getElementById('cost');
+	  const budget = document.getElementById('budget');
+	
+  const canvas = document.getElementById('fullScreenCanvas');
+  const ctx = canvas.getContext('2d');
+  speedSlider.addEventListener('input', updateValue);
 
-getMineralsForAsteroid();
+
 
   function getMineralsForAsteroid(){
     const randomMineralAmount = Math.floor(Math.random()* (3));
     let AsteroidValue = 0;
   for (let i = 0; i < randomMineralAmount; i++) {
     const randomIndex = Math.floor(Math.random() * minerals.size);
-    console.log(randomIndex)
+   
     let randomElement = Array.from(minerals.keys())[randomIndex];
-    console.log(randomElement);
+  
   AsteroidValue = AsteroidValue + minerals.get(randomElement);
-    console.log(AsteroidValue)
+   
   let listItem = document.getElementById("minerals");
 
   // Modify the text content
@@ -262,17 +269,30 @@ let listItemReward = document.getElementById("reward");
 listItemReward.textContent = listItemReward.textContent + AsteroidValue + "$";
   
 
-}
+};
+function calculateCost(){
+  console.log(speedSlider.value);
+  var currentValue = speedSlider.value; // Get the current value of the slider
+ 
+      var cost1 =  10000 * (currentValue + 2);
+      console.log(cost1);
+           cost.textContent = "Cost:" + cost1 + "$"; 
+           
+          
+           };
 
-function getMineralReward(){}
+function updateValue(){
+    errorMessage.textContent = "";
+   	calculateCost();
+   };
+ 
+getMineralsForAsteroid();
+
+function getMineralReward(){};
 	
-	 const speedSlider = document.getElementById('speed');
-	 const cost = document.getElementById('cost');
-	  const budget = document.getElementById('budget');
-	
-  const canvas = document.getElementById('fullScreenCanvas');
-  const ctx = canvas.getContext('2d');
-  speedSlider.addEventListener('input', updateValue);
+	 
+   updateValue();
+   
   
 
   // Function to resize the canvas to full screen
@@ -283,18 +303,8 @@ function getMineralReward(){}
     // Example drawing: fill the screen with a background color
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  };
   
-  function calculateCost(){
-  
-   var currentValue = speedSlider.value; // Get the current value of the slider
-  
-   		var cost1 =  10000 * (currentValue + 2);
-   		console.log(cost1);
-            cost.textContent = "Cost:" + cost1 + "$"; 
-            
-           
-            }
   
   function setNewBudget(){
   	var budget =  parseInt(document.getElementById('budget').innerHTML.substring(2)) - parseInt(document.getElementById('cost').innerHTML.substring(5));
@@ -307,17 +317,13 @@ function getMineralReward(){}
   
   
    
-   function updateValue() {
-    errorMessage.textContent = "";
-   	calculateCost();
-   }
+  
    
    
    
    function launchRocket(){
     
-    console.log(parseInt(cost.innerHTML.substring(5)));
-    console.log(parseInt(budget.innerHTML.substring(2)));
+    
    	if(parseInt(cost.innerHTML.substring(5)) < parseInt(budget.innerHTML.substring(2))){
    	const speedValue = document.getElementById('speed').value;
    	const rotationValue = document.getElementById('rotation').value;
@@ -328,7 +334,7 @@ function getMineralReward(){}
    	
    	
    	
-   }
+   };
    
    function calculateWin(){
    	var size;
@@ -341,7 +347,7 @@ function getMineralReward(){}
    	
    	
    	
-   }
+   };
    
    
 
