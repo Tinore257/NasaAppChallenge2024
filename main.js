@@ -124,6 +124,8 @@ function main() {
 
     //"spkid","full_name","name","diameter","e","a","q","i","om"(),"w" (peri),"ma","albedo","n","epoch"
    
+    const ellipsisPositionFS = computeEllipsisFragmentShader;
+
     const updatePositionVS = computeVertexShader;
 
     const updatePositionFS = computeFragmentShader;
@@ -166,6 +168,8 @@ function main() {
 
     const updatePositionProgram = webglUtils.createProgramFromSources(
         gl, [updatePositionVS, updatePositionFS]);
+    const updateEllipsisProgram = webglUtils.createProgramFromSources(
+        gl, [updatePositionVS, ellipsisPositionFS]);
     const drawParticlesProgram = webglUtils.createProgramFromSources(
         gl, [drawParticlesVS, drawParticlesFS]);
 
