@@ -1,5 +1,6 @@
 const particleVertexShader =  `
     attribute float id;
+    attribute vec3 a_position;
     uniform sampler2D positionTex;
     uniform sampler2D albedoTex;
     uniform sampler2D diameterTex;
@@ -26,17 +27,20 @@ const particleVertexShader =  `
     vec3 up = vec3(0,1,0);
     // do the common matrix math
     //gl_Position = matrix * vec4(position.xy, 0, 1);
-    v_albedo = albedo;
+    //v_albedo = albedo;
+    v_albedo = vec3(0,1,0);
 
-    vec4 pos = V * vec4(position.xyz, 1.0);
+    vec4 pos = V * vec4(a_position* diameter * 0.01 + position.xyz, 1.0);
+    
     gl_Position = P * pos;
 
     //float scaledDimater = length(pos.xy-surfacePoint.xy);
     //float scaledDimater = 1.0/ (length(position.xyz)* 1999);
 
     //gl_PointSize = (heightOfNearPlane * diameter)/ gl_Position.w;
+    gl_PointSize = 100.0;
 
-    gl_PointSize = max(diameter * 1.0/abs(pos.z), 2.0 );
+    //gl_PointSize = max(diameter * 1.0/abs(pos.z), 2.0 );
     }
 `;
 

@@ -113,6 +113,13 @@ function main() {
     return;
     }
 
+    const ext = gl.getExtension('ANGLE_instanced_arrays');
+    if (!ext) {
+    return alert('need ANGLE_instanced_arrays');
+    }
+
+    gl.disable(gl.CULL_FACE);
+
     const updatePositionProgram = webglUtils.createProgramFromSources(
         gl, [updatePositionVS, updatePositionFS]);
     const drawParticlesProgram = webglUtils.createProgramFromSources(
@@ -137,6 +144,7 @@ function main() {
 
     const drawParticlesProgLocs = {
     id: gl.getAttribLocation(drawParticlesProgram, 'id'),
+    vertexPos: gl.getAttribLocation(drawParticlesProgram, 'a_position'),
     positionTex: gl.getUniformLocation(drawParticlesProgram, 'positionTex'),
     albedoTex: gl.getUniformLocation(drawParticlesProgram, 'albedoTex'),
     diameterTex: gl.getUniformLocation(drawParticlesProgram, 'diameterTex'),
@@ -146,6 +154,39 @@ function main() {
     heightOfNearPlane: gl.getUniformLocation(drawParticlesProgram, 'heightOfNearPlane'),
     };
 
+    const planetVertices = new Float32Array([
+        //Base
+        0.5, -0.5, 0.0,
+        0.5, -0.5, 0.0,
+        0.5,  0.5, 0.0,
+
+        0.5, -0.5, 0.0,
+        0.5,  0.5, 0.0,
+        -0.5,  0.5, 0.0,
+
+        // Sides
+        -0.5, -0.5, 0.0,
+         0.5, -0.5, 0.0,
+         0.0,  0.0, 1.0,
+
+         0.5, -0.5, 0.0,
+         0.5,  0.5, 0.0,
+         0.0,  0.0, 1.0,
+
+         0.5,  0.5, 0.0,
+        -0.5,  0.5, 0.0,
+         0.0,  0.0, 1.0,
+
+        -0.5,  0.5, 0.0,
+        -0.5, -0.5, 0.0,
+         0.0,  0.0, 1.0,
+    ]);
+    
+    
+
+    const planetVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, planetVertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(planetVertices), gl.STATIC_DRAW);
 
     // setup a full canvas clip space quad
     const updatePositionBuffer = gl.createBuffer();
@@ -153,13 +194,13 @@ function main() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1,  1, -1,  1,  1, -1, 1,  1,]), gl.STATIC_DRAW);
 
     // setup an id buffer
-    const particleTexWidth = 10;
-    const particleTexHeight = 10;
+    const particleTexWidth = 100;
+    const particleTexHeight = 100;
     const numParticles = particleTexWidth * particleTexHeight;
     const ids = new Array(numParticles).fill(0).map((_, i) => i);
     const idBuffer = gl.createBuffer(); 
     gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ids), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ids), gl.DYNAMIC_DRAW);
 
     // we're going to base the initial positions on the size
     // of the canvas so lets update the size of the canvas
@@ -293,6 +334,7 @@ function main() {
         0,         // stride (0 = auto)
         0,         // offset
     );
+    ext.vertexAttribDivisorANGLE(updatePositionPrgLocs.position, 0);
 
     //e, a, q ,i ,node, peri ,M0 ,n , t0
     gl.activeTexture(gl.TEXTURE0);
@@ -328,23 +370,15 @@ function main() {
     gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
     gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate) - 2451545.0)/36525.0);
     console.log("cameraRotation "+ cameraRotation + " cameraDistance " + cameraDistance );
-    gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
+    //gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
+    ext.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 6, 1);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    // setup our attributes to tell WebGL how to pull
-    // the data from the buffer above to the id attribute
-    gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer);
-    gl.enableVertexAttribArray(drawParticlesProgLocs.id);
-    gl.vertexAttribPointer(
-        drawParticlesProgLocs.id,
-        1,         // size (num components)
-        gl.FLOAT,  // type of data in buffer
-        false,     // normalize
-        0,         // stride (0 = auto)
-        0,         // offset
-    );
+    //----------------------------------------------
+    // Main sphere render call
+    //----------------------------------------------
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, planetPositionInfo.tex);
@@ -354,6 +388,11 @@ function main() {
     gl.bindTexture(gl.TEXTURE_2D, diameterTex);
     
     gl.useProgram(drawParticlesProgram);
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, planetVertexBuffer);
+    gl.enableVertexAttribArray(drawParticlesProgLocs.vertexPos);
+    gl.vertexAttribPointer(drawParticlesProgLocs.vertexPos, 3, gl.FLOAT, false, 0, 0);
+
     gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexWidth);
     gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
     gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
@@ -389,7 +428,28 @@ function main() {
         heightOfNearPlane
     );
 
-    gl.drawArrays(gl.POINTS, 0, numParticles);
+    // setup our attributes to tell WebGL how to pull
+    // the data from the buffer above to the id attribute
+    gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer);
+    gl.enableVertexAttribArray(drawParticlesProgLocs.id);
+    gl.vertexAttribPointer(
+        drawParticlesProgLocs.id,
+        1,         // size (num components)
+        gl.FLOAT,  // type of data in buffer
+        false,     // normalize
+        0,         // stride (0 = auto)
+        0,         // offset
+    );
+    ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.id, 1);
+
+    ext.drawArraysInstancedANGLE(
+        gl.TRIANGLES,
+        0,             // offset
+        planetVertices.length / 3,   // num vertices per instance
+        particleTexHeight * particleTexWidth,  // num instances
+    );
+
+    //gl.drawArrays(gl.POINTS, 0, numParticles);
 
     // swap which texture we will read from
     // and which one we will write to
