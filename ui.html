@@ -694,14 +694,21 @@ width: 500px; /* Width of the rectangle */
 			calculateDistanceFromEarth();
 			calculateAsteroidSpeed();
 			let chosenAsteroidPosition = focusedAsteroid.position;
-			clamped_asteropd = projectPointOntoPlane(chosenAsteroidPosition, [0,0,0], asteroidPlaneNormal);
-			clamped_earth = projectPointOntoPlane(heavenlyBodies[0], [0,0,0], asteroidPlaneNormal);
-			clamped_rocket = projectPointOntoPlane(rocket_pos, [0,0,0], asteroidPlaneNormal);
-			dist_to_asteroid = vectorLength(vectorSubtract(clamped_asteropd, clamped_rocket));
-			dist_to_earth = vectorLength(vectorSubtract(clamped_asteropd, clamped_rocket));
-			document.getElementById('distance_rocket_target').textContent = Math.round(dist_to_asteroid*100/2)/100 + 'AU';
-			document.getElementById('distance_rocket_earth').textContent = Math.round(dist_to_earth*100/2)/100 + 'AU';
-			document.getElementById('rocket_speed').textContent = Math.round(vectorLength(rocket_speed)/1000) + 'km/s'
+			let clamped_asteropd = projectPointOntoPlane(chosenAsteroidPosition, [0,0,0], asteroidPlaneNormal);
+			let clamped_earth = projectPointOntoPlane(heavenlyBodies[0].position, [0,0,0], asteroidPlaneNormal);
+			let clamped_rocket = projectPointOntoPlane(rocket_pos, [0,0,0], asteroidPlaneNormal);
+
+			let distance_rocket_target = vectorLength(vectorSubtract(clamped_asteropd, clamped_rocket));
+			distance_rocket_target = Math.round(distance_rocket_target*100/2)/100;
+			document.getElementById('distance_rocket_target').textContent = distance_rocket_target + 'AU';
+			document.getElementById('distance_rocket_target').style.color = distance_rocket_target < 0.5 ? 'green' : 'inherit';
+
+			let dist_to_earth = vectorLength(vectorSubtract(clamped_earth, clamped_rocket));
+			dist_to_earth = Math.round(dist_to_earth*100/2)/100;
+			document.getElementById('distance_rocket_earth').textContent = dist_to_earth + 'AU';
+			document.getElementById('distance_rocket_earth').style.color = dist_to_earth < 0.5 ? 'green' : 'inherit';
+
+			document.getElementById('rocket_speed').textContent = Math.round(vectorLength(rocket_speed)) + 'km/s';
 			console.log(dist_to_asteroid, dist_to_earth)
 		  }
 	
@@ -862,7 +869,7 @@ width: 500px; /* Width of the rectangle */
 		addNode("Venus", 0.9, 0.9, 0.9,0.15) ;
 		addNode("theEarth", 0.2, 0, 0.8,0.15) ;
 		addNode("Mars", 1, 0.1, 0.15,0.1) ;
-		addNode('rocket', 0.5, 0.5, 0.5, 0.1);
+		addNode('rocket', 0, 1, 0, 0.1);
 		  
 		addChildNode("theMoon","theEarth", 0.7,0.7,0.7, 0.06) ;
 		  
@@ -974,7 +981,7 @@ width: 500px; /* Width of the rectangle */
 	<ul id="asteroidInfo">
 		<li>Distance to Asteroid:<b id="distance_rocket_target"></b></li>
 		<li>Distance to Earth:<b id="distance_rocket_earth"></b></li>
-		<li>Current Seed:<b id="rocket_speed"></b></li>
+		<li>Current Speed:<b id="rocket_speed"></b></li>
 	</ul>
 </div>
 
