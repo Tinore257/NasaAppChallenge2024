@@ -820,6 +820,8 @@ width: 500px; /* Width of the rectangle */
 					asteroidPlaneNormal = vectorNormalize(crossProduct(heavenlyBodies[hB].propagate(1), heavenlyBodies[hB].propagate(2.5)));
 				}
 			}
+      getMineralsForAsteroid();
+      
 		}
 	
 		/*function launchRocket() {
@@ -1070,6 +1072,10 @@ const speedSlider = document.getElementById('speedSlider');
 
 
   function getMineralsForAsteroid(){
+    let listItemReward = document.getElementById("reward");
+    let listItem = document.getElementById("minerals");
+    listItem.textContent = "";
+    listItemReward.textContent = "Approx. Reward:";
     const randomMineralAmount = Math.floor(Math.random()* (3));
     let AsteroidValue = 0;
   for (let i = 0; i < randomMineralAmount; i++) {
@@ -1079,7 +1085,7 @@ const speedSlider = document.getElementById('speedSlider');
   
   AsteroidValue = AsteroidValue + minerals.get(randomElement);
    
-  let listItem = document.getElementById("minerals");
+  
 
   // Modify the text content
   listItem.textContent = listItem.textContent + randomElement;
@@ -1092,7 +1098,7 @@ const speedSlider = document.getElementById('speedSlider');
     
 
 }
-let listItemReward = document.getElementById("reward");
+
 listItemReward.textContent = listItemReward.textContent + AsteroidValue + "$";
   
 
