@@ -188,11 +188,12 @@
  <canvas id="fullScreenCanvas"></canvas>
  <div class="rounded-rectangle" id="rectangle1">
  <h3>Mission Information:</h3>
-<ul>
-    <li>Dummy Asteroid Name:</li>
-    <li>Asteroid Speed:</li>
-    <li>Distance from Earth:</li>
-    <li>Asteroid Make Up:</li>
+<ul id="asteroidInfo">
+    <li id="name">Dummy Asteroid Name:</li>
+    <li id="speed">Asteroid Speed:</li>
+    <li id="distance">Distance from Earth:</li>
+    <li id="minerals">Minerals: </li>
+    <li id="reward">Approx. Reward </li>
 </ul>
  </div>
 
@@ -213,6 +214,57 @@
 </div>
 
 <script>
+
+  
+  let minerals = new Map();
+  let mineralPairs = [
+  ['iridium', 10000],
+  ['cobalt', 7000],
+  ['manganese', 8000],
+  ['tungston', 4000],
+  ['platinum', 9000],
+  ['gold', 5000],
+  ['rhodium', 8000],
+  ['rhutenium', 15000],
+  ['palladium', 4000]
+];
+
+  mineralPairs.forEach(([key, value]) => {
+  minerals.set(key, value);
+});
+
+getMineralsForAsteroid();
+
+  function getMineralsForAsteroid(){
+    const randomMineralAmount = Math.floor(Math.random()* (3));
+    let AsteroidValue = 0;
+  for (let i = 0; i < randomMineralAmount; i++) {
+    const randomIndex = Math.floor(Math.random() * minerals.size);
+    console.log(randomIndex)
+    let randomElement = Array.from(minerals.keys())[randomIndex];
+    console.log(randomElement);
+  AsteroidValue = AsteroidValue + minerals.get(randomElement);
+    console.log(AsteroidValue)
+  let listItem = document.getElementById("minerals");
+
+  // Modify the text content
+  listItem.textContent = listItem.textContent + randomElement;
+
+ 
+
+  if(i < randomMineralAmount-1){
+    listItem.textContent = listItem.textContent + ",";
+  }
+    
+
+}
+let listItemReward = document.getElementById("reward");
+listItemReward.textContent = listItemReward.textContent + AsteroidValue + "$";
+  
+
+}
+
+function getMineralReward(){}
 	
 	 const speedSlider = document.getElementById('speed');
 	 const cost = document.getElementById('cost');
