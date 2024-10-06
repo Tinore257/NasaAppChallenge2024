@@ -12,6 +12,18 @@ function addDays(date, days) {
 }
 
 
+function addHours(date, hours) {
+    const result = new Date(date);
+    result.setHours(result.getHours() + hours);
+    return result;
+}
+
+function addMinutes(date, minutes) {
+    const result = new Date(date);
+    result.setMinutes(result.getMinutes() + minutes);
+    return result;
+}
+
 
 // ref: http://stackoverflow.com/a/1293163/2343
 // This will parse a delimited string into an array of

@@ -14,10 +14,17 @@ const computeFragmentShader =  `
     uniform sampler2D M0Tex;
     uniform sampler2D nTex;
     uniform sampler2D t0Tex;
+    uniform sampler2D TTex;
+	  uniform sampler2D indexTex;
+
+    uniform float isEllipsis;
 
     uniform vec2 texDimensions;
     uniform vec2 canvasDimensions;
     uniform float deltaTime;
+
+    uniform vec2 texIndexDimensions;
+    uniform vec2 planetId;
 
     vec3 calculatePlanetPosition(float e, float a, float q, float i, float node, float peri, float M0, float n, float t0, float t) {
 
@@ -72,8 +79,17 @@ const computeFragmentShader =  `
     float M0 = texture2D(M0Tex, texcoord).x;
     float n = texture2D(nTex, texcoord).x;
     float t0 = texture2D(t0Tex, texcoord).x;
+    float T = texture2D(TTex, planetId).x;
+	  float index = texture2D(indexTex, texcoord).x;
 
-    vec3 pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, deltaTime);
+    vec3 pos = vec3(0.0);
+    if(isEllipsis < 0.5){
+      //
+      pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, deltaTime);
+    } else {
+      //ellipsis
+      pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, ((2460589.908218 + (T / texIndexDimensions.x * texIndexDimensions.y * index) - 2451545.0)/36525.0));
+    }
     gl_FragColor = vec4(pos, 1.0);
     }
 `;
