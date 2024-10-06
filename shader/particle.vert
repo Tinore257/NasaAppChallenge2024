@@ -34,9 +34,9 @@ const particleVertexShader =  `
     //float scaledDimater = length(pos.xy-surfacePoint.xy);
     //float scaledDimater = 1.0/ (length(position.xyz)* 1999);
 
-    gl_PointSize = (heightOfNearPlane * diameter)/ gl_Position.w;
+    //gl_PointSize = (heightOfNearPlane * diameter)/ gl_Position.w;
 
-    //gl_PointSize = max(diameter * 1.0/abs(pos.z), 2.0 );
+    gl_PointSize = max(diameter * 1.0/abs(pos.z), 2.0 );
     }
 `;
 
