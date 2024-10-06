@@ -596,7 +596,7 @@ width: 500px; /* Width of the rectangle */
 	 *-------------------------------------------------*/
 	
 	
-	var rocket_pos = heavenlyBodies[0].propagate(10);
+	var rocket_pos = [0,0,0];
 	var rocket_speed = [0,0,20000];
 	let earth_mass = 5.9722e24;
 	let sun_mass = 1.988e30;
@@ -958,7 +958,7 @@ width: 500px; /* Width of the rectangle */
 			  <Appearance>
 				  <Material diffuseColor='1 1 0' />	
 			  </Appearance>
-			  <Sphere radius='0.07'/>
+			  <Sphere radius='0.2'/>
 		   </Shape>
 		 </Transform> 
 		 <Viewpoint fieldOfView="0.785398" position="6 5.5 6.5" orientation="1 -1 0 -0.785"  description=""/>
@@ -976,7 +976,7 @@ width: 500px; /* Width of the rectangle */
 	</ul>
 	</div>
 
-<div class="rounded-rectangle" id="rectangle5">
+<div class="rounded-rectangle" id="rectangle5" style="display: none;">
 	<h3>Mission Information:</h3>
 	<ul id="asteroidInfo">
 		<li>Distance to Asteroid:<b id="distance_rocket_target"></b></li>
@@ -1110,7 +1110,7 @@ function getMineralReward(){};
    
    
    function launchRocket(){
-    
+    document.getElementById("rectangle5").style.display = 'inherit';
     
    	if(parseInt(cost.innerHTML.substring(5)) < parseInt(budget.innerHTML.substring(2))){
    	const speedValue = document.getElementById('speed').value;
