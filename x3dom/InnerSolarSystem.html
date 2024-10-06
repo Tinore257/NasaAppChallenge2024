@@ -392,6 +392,32 @@ function eccentricToTrueAnomaly(e, E) {
 	var trueAnomaly = 2 * Math.atan(Math.sqrt((1+e)/(1-e))* Math.tan(E/2));
 	return trueAnomaly
 }
+
+
+function calculateDistanceFromEarth(){
+	let distance = 0;
+
+for (let i = 0; i < 3; i++) {
+	distance += Math.pow(focusedAsteroid.position - heavenlyBodies[0].position, 2);
+}
+
+document.getElementById("distance").textContent = document.getElementById("distance").textContent  + distance;
+
+
+};
+
+function calculateAsteroidSpeed(){
+
+	focusedAsteroid.speed = vectorScale(vectorSubtract(focusedAsteroid.position, currentPosition),1.496e11/(24*3600*simSpeed*2));
+	document.getElementById("speed").textContent = document.getElementById("speed").textContent + " " + focusedAsteroid.speed;
+};
+
+function getScoreReward(){
+	if(score > 5){
+		let win =  score * parseInt(document.getElementById("approxReward").textContent.substring(15));
+		increaseBudget(win);
+	}
+};
 /*
 function meanToEccentricAnomaly(ec,m) {
     // Source: http://www.jgiesen.de/kepler/kepler.html
@@ -428,6 +454,8 @@ var rocket_speed = [0,0,20000];
 let earth_mass = 5.9722e24;
 let sun_mass = 1.988e30;
 let rocket_mass = 100;
+
+let focusedAsteroid = heavenlyBodies[1];
 
 var chosenAsteroid = '2010MU112';
 var asteroidPlaneNormal = [0,0,1]
@@ -591,7 +619,12 @@ function updatePosition()
 	   }
 	}
 	function chooseAsteroid() {
-		chosenAsteroid = '2010MU112';
+		chosenAsteroidNumber = Math.floor(Math.random()*asteroidLabels.length + 1)
+		
+		document.getElementById("asteroidName").textContent = heavenlyBodies[chosenAsteroidNumber].name;
+		focusedAsteroid = heavenlyBodies[chosenAsteroidNumber];
+		chosenAsteroid = asteroidLabels[chosenAsteroidNumber];
+		/*chosenAsteroid = '2010MU112';*/
 		document.getElementById(chosenAsteroid + 'Mat').setAttribute("diffuseColor", 1.0 + " " + 0 + " " + 1.0 );
 		for (var hB in heavenlyBodies) {
 			if (heavenlyBodies[hB].name === chooseAsteroid) {
