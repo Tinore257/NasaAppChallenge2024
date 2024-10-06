@@ -57,6 +57,50 @@ function inputHandler(deltT){
 
 }
 
+function generateSphereVertices(radius, latitudeBands, longitudeBands) {
+    const vertices = [];
+    for (let latNumber = 0; latNumber <= latitudeBands; latNumber++) {
+        const theta = latNumber * Math.PI / latitudeBands;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        for (let longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+            const phi = longNumber * 2 * Math.PI / longitudeBands;
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
+
+            const x = cosPhi * sinTheta;
+            const y = cosTheta;
+            const z = sinPhi * sinTheta;
+            vertices.push(radius * x, radius * y, radius * z);
+        }
+    }
+    return new Float32Array(vertices);
+}
+
+function generateSphereIndices(latitudeBands, longitudeBands) {
+    const indices = [];
+
+    for (let latNumber = 0; latNumber < latitudeBands; latNumber++) {
+        for (let longNumber = 0; longNumber < longitudeBands; longNumber++) {
+            const first = (latNumber * (longitudeBands + 1)) + longNumber;
+            const second = first + longitudeBands + 1;
+
+            indices.push(first);
+            indices.push(second);
+            indices.push(first + 1);
+
+            indices.push(second);
+            indices.push(second + 1);
+            indices.push(first + 1);
+        }
+    }
+
+    return indices;
+}
+
+
+
 function main() {
 
     document.addEventListener('keydown', (event) => {
@@ -154,6 +198,16 @@ function main() {
     heightOfNearPlane: gl.getUniformLocation(drawParticlesProgram, 'heightOfNearPlane'),
     };
 
+    let planetVertices = [];
+    let vertexIndexSphere = generateSphereVertices(1.0, 10, 10);
+    let indexSphere = generateSphereIndices(10, 10);
+    for (let i = 0; i < indexSphere.length; i++){
+        let index = indexSphere[i];
+        planetVertices.push(vertexIndexSphere[index*3] );
+        planetVertices.push(vertexIndexSphere[index*3+1]);
+        planetVertices.push(vertexIndexSphere[index*3+2]);
+    }
+    /*
     const planetVertices = new Float32Array([
         //Base
         0.5, -0.5, 0.0,
@@ -181,7 +235,7 @@ function main() {
         -0.5, -0.5, 0.0,
          0.0,  0.0, 1.0,
     ]);
-    
+    */
     
 
     const planetVertexBuffer = gl.createBuffer();

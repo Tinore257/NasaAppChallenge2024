@@ -27,8 +27,7 @@ const particleVertexShader =  `
     vec3 up = vec3(0,1,0);
     // do the common matrix math
     //gl_Position = matrix * vec4(position.xy, 0, 1);
-    //v_albedo = albedo;
-    v_albedo = vec3(0,1,0);
+    v_albedo = albedo;
 
     vec4 pos = V * vec4(a_position* diameter * 0.01 + position.xyz, 1.0);
     
