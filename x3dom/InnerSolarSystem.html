@@ -395,21 +395,14 @@ function eccentricToTrueAnomaly(e, E) {
 
 
 function calculateDistanceFromEarth(){
-	let distance = 0;
-
-for (let i = 0; i < 3; i++) {
-	distance += Math.pow(focusedAsteroid.position - heavenlyBodies[0].position, 2);
-}
-
-document.getElementById("distance").textContent = document.getElementById("distance").textContent  + distance;
-
-
+	let distance = vectorLength(vectorSubtract(focusedAsteroid.position, heavenlyBodies[0].position));
+	document.getElementById("distance").textContent = distance;
 };
 
 function calculateAsteroidSpeed(){
 
-	focusedAsteroid.speed = vectorScale(vectorSubtract(focusedAsteroid.position, currentPosition),1.496e11/(24*3600*simSpeed*2));
-	document.getElementById("speed").textContent = document.getElementById("speed").textContent + " " + focusedAsteroid.speed;
+	//focusedAsteroid.speed = vectorScale(vectorSubtract(focusedAsteroid.position, currentPosition),1.496e11/(24*3600*simSpeed*2));
+	document.getElementById("speed").textContent = vectorLength(focusedAsteroid.speed);
 };
 
 function getScoreReward(){
@@ -457,7 +450,6 @@ let rocket_mass = 100;
 
 let focusedAsteroid = heavenlyBodies[1];
 
-var chosenAsteroid = '2010MU112';
 var asteroidPlaneNormal = [0,0,1]
 
 var chosenRotation = 2;
@@ -544,12 +536,10 @@ function updatePosition()
 	  //console.log('rocket pos', rocket_pos);
 	  document.getElementById('rocket').setAttribute('translation', rocket_pos[0] + ' ' + rocket_pos[1] + ' ' + rocket_pos[2]);
 
-	  if (chosenAsteroid) {
-		for (var hB in heavenlyBodies) {
-			if (heavenlyBodies[hB].name === chooseAsteroid) {
-				var chosenAsteroidPosition = heavenlyBodies[hB];
-			}
-		}
+	  if (focusedAsteroid) {
+		calculateDistanceFromEarth();
+		calculateAsteroidSpeed();
+		let chosenAsteroidPosition = focusedAsteroid.position;
 		clamped_asteropd = projectPointOntoPlane(chosenAsteroidPosition, [0,0,0], asteroidPlaneNormal);
 		clamped_earth = projectPointOntoPlane(heavenlyBodies[0], [0,0,0], asteroidPlaneNormal);
 		clamped_rocket = projectPointOntoPlane(rocket_pos, [0,0,0], asteroidPlaneNormal);
@@ -590,7 +580,7 @@ function updatePosition()
 		//	console.log('plane normal is', normal);
 		//	console.log('sun offset is', normal[0] * posA[0] + normal[1] * posA[1] + normal[2] * posA[2]);
 		//}
-		if (heavenlyBodies[hB].name === 'theEarth' || heavenlyBodies[hB].name === chosenAsteroid) {
+		if (heavenlyBodies[hB].name === 'theEarth' || heavenlyBodies[hB].name === focusedAsteroid.name) {
 		} else {
 	     var omat = document.getElementById(heavenlyBodies[hB].name + "OrbitMat");
 		 omat.setAttribute("transparency",opacity) ;
@@ -623,9 +613,7 @@ function updatePosition()
 		
 		document.getElementById("asteroidName").textContent = heavenlyBodies[chosenAsteroidNumber].name;
 		focusedAsteroid = heavenlyBodies[chosenAsteroidNumber];
-		chosenAsteroid = asteroidLabels[chosenAsteroidNumber];
-		/*chosenAsteroid = '2010MU112';*/
-		document.getElementById(chosenAsteroid + 'Mat').setAttribute("diffuseColor", 1.0 + " " + 0 + " " + 1.0 );
+		document.getElementById(focusedAsteroid.name + 'Mat').setAttribute("diffuseColor", 1.0 + " " + 0 + " " + 1.0 );
 		for (var hB in heavenlyBodies) {
 			if (heavenlyBodies[hB].name === chooseAsteroid) {
 				asteroidPlaneNormal = vectorNormalize(crossProduct(heavenlyBodies[hB].propagate(1), heavenlyBodies[hB].propagate(2.5)));
@@ -633,10 +621,10 @@ function updatePosition()
 		}
 	}
 
-	function shootRocket() {
+	function launchRocket() {
 		chooseAsteroid();
 		rocket_pos = heavenlyBodies[0].position;
-		rocket_speed = vectorAdd(heavenlyBodies[0].speed, multiplyMatrixVector(rotationMatrix(asteroidPlaneNormal, chosenRotation), vectorScale(heavenlyBodies[0].speed, chosenSpeed)));
+		rocket_speed = vectorAdd(heavenlyBodies[0].speed, multiplyMatrixVector(rotationMatrix(asteroidPlaneNormal, document.getElementById('rotation').value), vectorScale(heavenlyBodies[0].speed, document.getElementById('speedSlider').value)));
 	}
 //-----------------------------------------------------------------------------------------------------
 	function traceOrbits()  
@@ -711,6 +699,7 @@ function updatePosition()
 	 	  for (var hB in asteroidLabels) {
 	         heavenlyBodies[hB].smA = heavenlyBodies[hB].smA * AUscaler ;
 	  }
+
    
   // Node Parameters -- id, color r, g b, radius
     addNode("Venus", 0.9, 0.9, 0.9,0.15) ;
@@ -790,6 +779,7 @@ function updatePosition()
 	  traceOrbits() ;  
 	  
      setInterval(function () {updatePosition() }, 50);
+	 chooseAsteroid();
 	// updatePosition() 
     }	
    </script>
@@ -807,6 +797,23 @@ function updatePosition()
    trajectories of 50 potentially hazardous asteroids. A slider bar controls the speed of the animation. Buttons hide or show the labels and
    the traced trajectories.   
    </p>
+   <ul id="asteroidInfo">
+    <li>Dummy Asteroid Name:<p id="asteroidName"></p></li>
+    <li>Asteroid Speed:<p id="speed"></p></li>
+    <li>Distance from Earth: <p id='distance'></p></li>
+    <li id="minerals">Minerals: </li>
+    <li id="reward">Approx. Reward </li>
+</ul>
+<label for="speedSlider"class="label" id="label1">Speed: </label>
+    <input type="range" id="speedSlider" class="slider" min="-1" max="3" value="1.4" step="0.001">
+   
+    <label for="rotation"class="label"  id="label2">Rotation:</label>
+    <input type="range" id="rotation" class="slider" min="0" max="6.3" value="0" step="0.001">
+        
+    <p id="errorMessage"> </p>
+	<p id="cost">Cost: </p><p id="budget">$$100000000</p>
+	 <button  onclick="launchRocket()" class="rounded-button" id="actionButton">Launch</button>
+
    <p>
    Sources of data and equations applied in the model:
    <ol>
