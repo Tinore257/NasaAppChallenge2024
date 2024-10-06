@@ -39,9 +39,12 @@
             box-shadow: 0 0 20px 10px rgba(255, 165, 0, 0.7); /* Glowing effect */
         }
     
+		ul {
+			padding-right: 30px;
+		}
      .rounded-rectangle {
-            width: 500px; /* Width of the rectangle */
-            height: 300px; /* Height of the rectangle */
+            
+            
             background-color: black; /* Background color */
             border-radius: 10px; /* Rounding of edges (the higher the value, the more rounded it is) */
           opacity: 0.8;
@@ -175,11 +178,18 @@
         #rectangle1 {top: 50px;
             	left: 100px;
             	 width: 300px; /* Width of the rectangle */
-            height: 300px;
+            
             	position: fixed;}
         #rectangle2 {
         text-align: center;
             	right: 100px;
+				bottom: 0;
+width: 500px; /* Width of the rectangle */
+	            height: 300px; /* Height of the rectangle */
+}
+				#rectangle5 {
+        text-align: center;
+            	left: 100px;
             	position: fixed;
             	bottom: 0;}
             
@@ -542,13 +552,11 @@
 	
 	function calculateDistanceFromEarth(){
 		let distance = vectorLength(vectorSubtract(focusedAsteroid.position, heavenlyBodies[0].position));
-		document.getElementById("distance").textContent = distance;
+		document.getElementById("distance").textContent = Math.round(distance*100 / 2)/100 + 'AU';
 	};
 	
 	function calculateAsteroidSpeed(){
-	
-		//focusedAsteroid.speed = vectorScale(vectorSubtract(focusedAsteroid.position, currentPosition),1.496e11/(24*3600*simSpeed*2));
-		document.getElementById("speed").textContent = vectorLength(focusedAsteroid.speed);
+		document.getElementById("speed").textContent = Math.floor(vectorLength(focusedAsteroid.speed) / 1000) + 'km/s';
 	};
 	
 	function getScoreReward(){
@@ -691,6 +699,9 @@
 			clamped_rocket = projectPointOntoPlane(rocket_pos, [0,0,0], asteroidPlaneNormal);
 			dist_to_asteroid = vectorLength(vectorSubtract(clamped_asteropd, clamped_rocket));
 			dist_to_earth = vectorLength(vectorSubtract(clamped_asteropd, clamped_rocket));
+			document.getElementById('distance_rocket_target').textContent = Math.round(dist_to_asteroid*100/2)/100 + 'AU';
+			document.getElementById('distance_rocket_earth').textContent = Math.round(dist_to_earth*100/2)/100 + 'AU';
+			document.getElementById('rocket_speed').textContent = Math.round(vectorLength(rocket_speed)/1000) + 'km/s'
 			console.log(dist_to_asteroid, dist_to_earth)
 		  }
 	
@@ -946,17 +957,26 @@
 		 <Viewpoint fieldOfView="0.785398" position="6 5.5 6.5" orientation="1 -1 0 -0.785"  description=""/>
 		</Scene>
 	  </X3D>
- <div class="rounded-rectangle" id="rectangle1">
- <h3>Mission Information:</h3>
-<ul id="asteroidInfo">
-    <li id="asteroidName">Dummy Asteroid Name:</li>
-    <li id="speed">Asteroid Speed:</li>
-    <li id="distance">Distance from Earth:</li>
-    <li id="minerals">Minerals: </li>
-    <li id="reward">Approx. Reward </li>
-	<li><input type="button" id="orbits" value="Toggle Orbits" onclick="toggleOrbits();" /></li>
-</ul>
- </div>
+<div class="rounded-rectangle" id="rectangle1">
+	<h3>Asteroid Information:</h3>
+	<ul id="asteroidInfo">
+		<li>Asteroid Name:<b id="asteroidName"></b></li>
+		<li>Asteroid Speed:<b id="speed">fast</b></li>
+		<li>Distance from Earth:<b id="distance"></b></li>
+		<li>Minerals: <b id="minerals"></b></li>
+		<li id="reward">Approx. Reward </li>
+		<li><input type="button" id="orbits" value="Toggle Orbits" onclick="toggleOrbits();" /></li>
+	</ul>
+	</div>
+
+<div class="rounded-rectangle" id="rectangle5">
+	<h3>Mission Information:</h3>
+	<ul id="asteroidInfo">
+		<li>Distance to Asteroid:<b id="distance_rocket_target"></b></li>
+		<li>Distance to Earth:<b id="distance_rocket_earth"></b></li>
+		<li>Current Seed:<b id="rocket_speed"></b></li>
+	</ul>
+</div>
 
   <!-- Canvas -->
 
@@ -1035,7 +1055,7 @@ function calculateCost(){
   console.log(speedSlider.value);
   var currentValue = speedSlider.value; // Get the current value of the slider
  
-      var cost1 =  10000 * (currentValue + 2);
+      var cost1 =  10000 * (Math.abs(currentValue) + 2);
       console.log(cost1);
            cost.textContent = "Cost:" + cost1 + "$"; 
            
