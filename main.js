@@ -164,7 +164,7 @@ function main() {
     return alert('need ANGLE_instanced_arrays');
     }
 
-    gl.disable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
 
     const updatePositionProgram = webglUtils.createProgramFromSources(
         gl, [updatePositionVS, updatePositionFS]);
@@ -206,8 +206,10 @@ function main() {
     };
 
     let planetVertices = [];
-    let vertexIndexSphere = generateSphereVertices(1.0, 10, 10);
-    let indexSphere = generateSphereIndices(10, 10);
+    let planetLats = 20;
+    let planetLongs = 20;
+    let vertexIndexSphere = generateSphereVertices(0.5, planetLats, planetLongs );
+    let indexSphere = generateSphereIndices(planetLats, planetLongs);
     for (let i = 0; i < indexSphere.length; i++){
         let index = indexSphere[i];
         planetVertices.push(vertexIndexSphere[index*3] );

@@ -1,8 +1,8 @@
 function toJulianDay(date) {
     const JD_JAN_1_1970 = 2440587.5; // Julian Day for January 1, 1970
-    const msInDay = 86400000; // Number of milliseconds in a day
+    const minutesInDay = 86400.0 / 60.0; // Number of milliseconds in a day
 
-    return JD_JAN_1_1970 + (date.getTime() / msInDay);
+    return JD_JAN_1_1970 / 60000.0 + ( (date.getTime()/60000.0 ) / minutesInDay);
 }
 
 function addDays(date, days) {
