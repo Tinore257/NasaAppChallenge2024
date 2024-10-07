@@ -5,10 +5,7 @@ const computeFragmentShader =  `
 */
 
 
-    uniform sampler2D eTex;
-    uniform sampler2D aTex;
-    uniform sampler2D qTex;
-    uniform sampler2D iTex;
+    uniform sampler2D eaqiTex;
     uniform sampler2D nodeTex;
     uniform sampler2D periTex;
     uniform sampler2D M0Tex;
@@ -70,10 +67,10 @@ const computeFragmentShader =  `
     // compute texcoord from gl_FragCoord;
     vec2 texcoord = gl_FragCoord.xy / texDimensions;
 
-    float e = texture2D(eTex, texcoord).x;
-    float a = texture2D(aTex, texcoord).x;
-    float q = texture2D(qTex, texcoord).x;
-    float i = texture2D(iTex, texcoord).x;
+    float e = texture2D(eaqiTex, texcoord).x;
+    float a = texture2D(eaqiTex, texcoord).y;
+    float q = texture2D(eaqiTex, texcoord).z;
+    float i = texture2D(eaqiTex, texcoord).w;
     float node = texture2D(nodeTex, texcoord).x;
     float peri = texture2D(periTex, texcoord).x;
     float M0 = texture2D(M0Tex, texcoord).x;
