@@ -177,8 +177,8 @@ function main() {
         eaqiTex: gl.getUniformLocation(updatePositionProgram, 'eaqiTex'),
         nodeperiM0nTex: gl.getUniformLocation(updatePositionProgram, 'nodeperiM0nTex'),
         t0Tex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
-        TTex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
-        indexTex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
+        TTex: gl.getUniformLocation(updatePositionProgram, 'TTex'),
+        indexTex: gl.getUniformLocation(updatePositionProgram, 'indexTex'),
         texDimensions: gl.getUniformLocation(updatePositionProgram, 'texDimensions'),
         canvasDimensions: gl.getUniformLocation(updatePositionProgram, 'canvasDimensions'),
         deltaTime: gl.getUniformLocation(updatePositionProgram, 'deltaTime'),
@@ -189,14 +189,14 @@ function main() {
 
     const drawParticlesProgLocs = {
     id: gl.getAttribLocation(drawParticlesProgram, 'id'),
-    vertexPos: gl.getAttribLocation(drawParticlesProgram, 'a_position'),
+    a_position: gl.getAttribLocation(drawParticlesProgram, 'a_position'),
     positionTex: gl.getUniformLocation(drawParticlesProgram, 'positionTex'),
     albedoTex: gl.getUniformLocation(drawParticlesProgram, 'albedoTex'),
     diameterTex: gl.getUniformLocation(drawParticlesProgram, 'diameterTex'),
     texDimensions: gl.getUniformLocation(drawParticlesProgram, 'texDimensions'),
     perspective: gl.getUniformLocation(drawParticlesProgram, 'P'),
     view: gl.getUniformLocation(drawParticlesProgram, 'V'),
-    heightOfNearPlane: gl.getUniformLocation(drawParticlesProgram, 'heightOfNearPlane'),
+    isEllipsis: gl.getUniformLocation(drawParticlesProgram, 'isEllipsis'),
     };
 
     let planetVertices = [];
@@ -210,7 +210,6 @@ function main() {
         planetVertices.push(vertexIndexSphere[index*3+1]);
         planetVertices.push(vertexIndexSphere[index*3+2]);
     }
-    
 
     const planetVertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, planetVertexBuffer);
@@ -287,6 +286,11 @@ function main() {
     const ellipsis_ids = new Array(numEllipse).fill(0).map((_, i) => i);
     const ellipsis_position = new Float32Array(
         ellipsis_ids.map(i => [0, 0, 0, 0]).flat());
+
+
+    const ellipseVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, ellipseVertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ellipsis_position), gl.STATIC_DRAW);
     
     //e, a, q ,i ,node, peri ,M0 ,n , t0
     // create a texture for the velocity and 2 textures for the positions.
@@ -295,7 +299,6 @@ function main() {
     const t0Tex = createTexture(gl, t0_array, particleTexWidth, particleTexHeight);
     const positionTex1 = createTexture(gl, positions, particleTexWidth, particleTexHeight);
     
-
 
     const ellipsisTex1 = createTexture(gl, ellipsis_position, ellipseTexWidth, ellpiseTexHight);
 
@@ -470,14 +473,17 @@ function main() {
         
         gl.useProgram(drawParticlesProgram);
         
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, planetVertexBuffer);
-        gl.enableVertexAttribArray(drawParticlesProgLocs.vertexPos);
-        gl.vertexAttribPointer(drawParticlesProgLocs.vertexPos, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(drawParticlesProgLocs.a_position);
+        gl.vertexAttribPointer(drawParticlesProgLocs.a_position, 3, gl.FLOAT, false, 0, 0);
+        //ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.a_position, 0);
 
-        gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexWidth);
+        gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
         gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
         gl.uniform1i(drawParticlesProgLocs.diameterTex, 2)
+        gl.uniform1f(drawParticlesProgLocs.isEllipsis, 0.0)
         let transl = m4.translation(...[0, 0, cameraDistance]);
         
         let view = 
@@ -498,15 +504,6 @@ function main() {
             drawParticlesProgLocs.view,
             false,
             view
-        );
-        let fovy = 90; // degrees
-        let viewport = gl.getParameter(gl.VIEWPORT);
-        let heightOfNearPlane = Math.abs(viewport[3]-viewport[1]) / (2*Math.tan(0.5*fovy*Math.PI/180.0));
-        //view
-        gl.uniform1f(
-            drawParticlesProgLocs.heightOfNearPlane,
-            false,
-            heightOfNearPlane
         );
 
         // setup our attributes to tell WebGL how to pull
@@ -535,9 +532,70 @@ function main() {
     //----------------------------------------------
     // render ellipsis
     //----------------------------------------------
-    { 
+    if(true){ 
         
-    
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, ellipsisPositionInfo.tex);
+        gl.activeTexture(gl.TEXTURE0 + 1);
+        gl.bindTexture(gl.TEXTURE_2D, albedoTex);
+        gl.activeTexture(gl.TEXTURE0 + 2);
+        gl.bindTexture(gl.TEXTURE_2D, diameterTex);
+        
+        gl.useProgram(drawParticlesProgram);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, ellipseVertexBuffer);
+        gl.enableVertexAttribArray(drawParticlesProgLocs.a_position);
+        gl.vertexAttribPointer(drawParticlesProgLocs.a_position, 3, gl.FLOAT, false, 0, 0);
+
+        gl.uniform2f(drawParticlesProgLocs.texDimensions, ellipseTexWidth, ellpiseTexHight);
+        gl.uniform1i(drawParticlesProgLocs.ellipsisTex1, 0);  // tell the shader the position texture is on texture unit 0
+        gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
+        gl.uniform1i(drawParticlesProgLocs.diameterTex, 2)
+        let transl = m4.translation(...[0, 0, cameraDistance]);
+        
+        let view = 
+            m4.multiply(
+                m4.multiply(transl,
+                m4.axisRotation([1,0,0], cameraRotation[0]),
+                ),
+                m4.axisRotation([0,1,0], cameraRotation[1])
+            );
+        //perspective
+        gl.uniformMatrix4fv(
+            drawParticlesProgLocs.perspective,
+            false,
+            m4.perspective(Math.PI/2, gl.canvas.width/gl.canvas.height, 0.001, 10000)
+        );
+        //view
+        gl.uniformMatrix4fv(
+            drawParticlesProgLocs.view,
+            false,
+            view
+        );
+        // setup our attributes to tell WebGL how to pull
+        // the data from the buffer above to the id attribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer);
+        gl.enableVertexAttribArray(drawParticlesProgLocs.id);
+        gl.vertexAttribPointer(
+            drawParticlesProgLocs.id,
+            1,         // size (num components)
+            gl.FLOAT,  // type of data in buffer
+            false,     // normalize
+            0,         // stride (0 = auto)
+            0,         // offset
+        );
+        ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.id, 1);
+
+        ext.drawArraysInstancedANGLE(
+            gl.POINTS,
+            0,             // offset
+            numEllipse,   // num vertices per instance
+            1,  // num instances
+        );
+
     }
 
     requestAnimationFrame(render);
