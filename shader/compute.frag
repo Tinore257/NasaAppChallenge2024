@@ -6,10 +6,7 @@ const computeFragmentShader =  `
 
 
     uniform sampler2D eaqiTex;
-    uniform sampler2D nodeTex;
-    uniform sampler2D periTex;
-    uniform sampler2D M0Tex;
-    uniform sampler2D nTex;
+    uniform sampler2D nodeperiM0nTex;
     uniform sampler2D t0Tex;
     uniform sampler2D TTex;
 	  uniform sampler2D indexTex;
@@ -71,10 +68,10 @@ const computeFragmentShader =  `
     float a = texture2D(eaqiTex, texcoord).y;
     float q = texture2D(eaqiTex, texcoord).z;
     float i = texture2D(eaqiTex, texcoord).w;
-    float node = texture2D(nodeTex, texcoord).x;
-    float peri = texture2D(periTex, texcoord).x;
-    float M0 = texture2D(M0Tex, texcoord).x;
-    float n = texture2D(nTex, texcoord).x;
+    float node = texture2D(nodeperiM0nTex, texcoord).x;
+    float peri = texture2D(nodeperiM0nTex, texcoord).y;
+    float M0 = texture2D(nodeperiM0nTex, texcoord).z;
+    float n = texture2D(nodeperiM0nTex, texcoord).w;
     float t0 = texture2D(t0Tex, texcoord).x;
     float T = texture2D(TTex, planetId).x;
 	  float index = texture2D(indexTex, texcoord).x;

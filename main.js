@@ -175,10 +175,7 @@ function main() {
     const updatePositionPrgLocs = {
         position: gl.getAttribLocation(updatePositionProgram, 'position'),
         eaqiTex: gl.getUniformLocation(updatePositionProgram, 'eaqiTex'),
-        nodeTex: gl.getUniformLocation(updatePositionProgram, 'nodeTex'),
-        periTex: gl.getUniformLocation(updatePositionProgram, 'periTex'),
-        M0Tex: gl.getUniformLocation(updatePositionProgram, 'M0Tex'),
-        nTex: gl.getUniformLocation(updatePositionProgram, 'nTex'),
+        nodeperiM0nTex: gl.getUniformLocation(updatePositionProgram, 'nodeperiM0nTex'),
         t0Tex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
         TTex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
         indexTex: gl.getUniformLocation(updatePositionProgram, 't0Tex'),
@@ -249,14 +246,11 @@ function main() {
                         transposed_data_array[5][i],
                         transposed_data_array[6][i],
                         transposed_data_array[7][i]]).flat());
-    const node_array = new Float32Array(
-        ids.map(i => [transposed_data_array[8][i], 0, 0, 0]).flat());
-    const peri_array = new Float32Array(
-        ids.map(i => [transposed_data_array[9][i], 0, 0, 0]).flat());
-    const M0_array = new Float32Array(
-        ids.map(i => [transposed_data_array[10][i], 0, 0, 0]).flat());
-    const n_array = new Float32Array(
-        ids.map(i => [transposed_data_array[12][i], 0, 0, 0]).flat());
+    const nodeperiM0n_array = new Float32Array(
+        ids.map(i => [  transposed_data_array[8][i],
+                        transposed_data_array[8][i], 
+                        transposed_data_array[10][i], 
+                        transposed_data_array[12][i]]).flat());
     const t0_array = new Float32Array(
         ids.map(i => [transposed_data_array[13][i], 0, 0, 0]).flat());
     const albedo_array = new Float32Array(
@@ -297,10 +291,7 @@ function main() {
     //e, a, q ,i ,node, peri ,M0 ,n , t0
     // create a texture for the velocity and 2 textures for the positions.
     const eaqiTex = createTexture(gl, eaqi_array, particleTexWidth, particleTexHeight);
-    const nodeTex = createTexture(gl, node_array, particleTexWidth, particleTexHeight);
-    const periTex = createTexture(gl, peri_array, particleTexWidth, particleTexHeight);
-    const M0Tex = createTexture(gl, M0_array, particleTexWidth, particleTexHeight);
-    const nTex = createTexture(gl, n_array, particleTexWidth, particleTexHeight);
+    const nodeperiM0nTex = createTexture(gl, nodeperiM0n_array, particleTexWidth, particleTexHeight);
     const t0Tex = createTexture(gl, t0_array, particleTexWidth, particleTexHeight);
     const positionTex1 = createTexture(gl, positions, particleTexWidth, particleTexHeight);
     
@@ -392,23 +383,14 @@ function main() {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, eaqiTex);
         gl.activeTexture(gl.TEXTURE0 + 1);
-        gl.bindTexture(gl.TEXTURE_2D, nodeTex);
+        gl.bindTexture(gl.TEXTURE_2D, nodeperiM0nTex);
         gl.activeTexture(gl.TEXTURE0 + 2);
-        gl.bindTexture(gl.TEXTURE_2D, periTex);
-        gl.activeTexture(gl.TEXTURE0 + 3);
-        gl.bindTexture(gl.TEXTURE_2D, M0Tex);
-        gl.activeTexture(gl.TEXTURE0 + 4);
-        gl.bindTexture(gl.TEXTURE_2D, nTex);
-        gl.activeTexture(gl.TEXTURE0 + 5);
         gl.bindTexture(gl.TEXTURE_2D, t0Tex);
 
         gl.useProgram(updatePositionProgram);
         gl.uniform1i(updatePositionPrgLocs.eaqiTex, 0);  // tell the shader the position texture is on texture unit 0
         gl.uniform1i(updatePositionPrgLocs.nodeTex, 1);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.periTex, 2);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.M0Tex, 3);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.nTex, 4);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.t0Tex, 5);  // tell the shader the position texture is on texture unit 1
+        gl.uniform1i(updatePositionPrgLocs.t0Tex, 2);  // tell the shader the position texture is on texture unit 1
         gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
         gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate)));
@@ -450,23 +432,14 @@ function main() {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, eaqiTex);
         gl.activeTexture(gl.TEXTURE0 + 1);
-        gl.bindTexture(gl.TEXTURE_2D, nodeTex);
+        gl.bindTexture(gl.TEXTURE_2D, nodeperiM0nTex);
         gl.activeTexture(gl.TEXTURE0 + 2);
-        gl.bindTexture(gl.TEXTURE_2D, periTex);
-        gl.activeTexture(gl.TEXTURE0 + 3);
-        gl.bindTexture(gl.TEXTURE_2D, M0Tex);
-        gl.activeTexture(gl.TEXTURE0 + 4);
-        gl.bindTexture(gl.TEXTURE_2D, nTex);
-        gl.activeTexture(gl.TEXTURE0 + 5);
         gl.bindTexture(gl.TEXTURE_2D, t0Tex);
 
         gl.useProgram(updatePositionProgram);
         gl.uniform1i(updatePositionPrgLocs.eaqiTex, 0);  // tell the shader the position texture is on texture unit 0
-        gl.uniform1i(updatePositionPrgLocs.nodeTex, 1);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.periTex, 2);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.M0Tex, 3);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.nTex, 4);  // tell the shader the position texture is on texture unit 1
-        gl.uniform1i(updatePositionPrgLocs.t0Tex, 5);  // tell the shader the position texture is on texture unit 1
+        gl.uniform1i(updatePositionPrgLocs.nodeperiM0nTex, 1);  // tell the shader the position texture is on texture unit 1
+        gl.uniform1i(updatePositionPrgLocs.t0Tex, 2);  // tell the shader the position texture is on texture unit 1
         gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
         gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate)));
