@@ -5,6 +5,8 @@ function toJulianDay(date) {
     return JD_JAN_1_1970 / 60000.0 + ( (date.getTime()/60000.0 ) / minutesInDay);
 }
 
+
+
 function addDays(date, days) {
     const result = new Date(date);
     result.setDate(result.getDate() + days);

@@ -40,6 +40,14 @@ function inputHandler(deltT){
         cameraDistance = (cameraDistance - 1 * deltT * 1);
     }
 
+     //forward
+     if(pressedKeys.includes("i")){
+        cameraDistance = (cameraDistance + 1 * deltT * 0.01)
+    }
+    if(pressedKeys.includes("k")){
+        cameraDistance = (cameraDistance - 1 * deltT * 0.01);
+    }
+
     
 
     while(cameraRotation[1] < 0.0){
@@ -183,20 +191,20 @@ function main() {
         canvasDimensions: gl.getUniformLocation(updatePositionProgram, 'canvasDimensions'),
         deltaTime: gl.getUniformLocation(updatePositionProgram, 'deltaTime'),
         texIndexDimensions: gl.getUniformLocation(updatePositionProgram, 'texIndexDimensions'),
-        planetID: gl.getUniformLocation(updatePositionProgram, 'planetID'),
-        isEllipse: gl.getUniformLocation(updatePositionProgram, 'isEllipse'),
+        planetId: gl.getUniformLocation(updatePositionProgram, 'planetId'),
+        isEllipsis: gl.getUniformLocation(updatePositionProgram, 'isEllipsis'),
     };
 
     const drawParticlesProgLocs = {
-    id: gl.getAttribLocation(drawParticlesProgram, 'id'),
-    a_position: gl.getAttribLocation(drawParticlesProgram, 'a_position'),
-    positionTex: gl.getUniformLocation(drawParticlesProgram, 'positionTex'),
-    albedoTex: gl.getUniformLocation(drawParticlesProgram, 'albedoTex'),
-    diameterTex: gl.getUniformLocation(drawParticlesProgram, 'diameterTex'),
-    texDimensions: gl.getUniformLocation(drawParticlesProgram, 'texDimensions'),
-    perspective: gl.getUniformLocation(drawParticlesProgram, 'P'),
-    view: gl.getUniformLocation(drawParticlesProgram, 'V'),
-    isEllipsis: gl.getUniformLocation(drawParticlesProgram, 'isEllipsis'),
+        id: gl.getAttribLocation(drawParticlesProgram, 'id'),
+        a_position: gl.getAttribLocation(drawParticlesProgram, 'a_position'),
+        positionTex: gl.getUniformLocation(drawParticlesProgram, 'positionTex'),
+        albedoTex: gl.getUniformLocation(drawParticlesProgram, 'albedoTex'),
+        diameterTex: gl.getUniformLocation(drawParticlesProgram, 'diameterTex'),
+        texDimensions: gl.getUniformLocation(drawParticlesProgram, 'texDimensions'),
+        perspective: gl.getUniformLocation(drawParticlesProgram, 'P'),
+        view: gl.getUniformLocation(drawParticlesProgram, 'V'),
+        isEllipsis: gl.getUniformLocation(drawParticlesProgram, 'isEllipsis'),
     };
 
     let planetVertices = [];
@@ -236,6 +244,7 @@ function main() {
 
 
     // e 4, a 5, q 6, i 7, node 8, peri 9, M0 10, n 12,  t0 13
+
 
     const positions = new Float32Array(
         ids.map(_ => [0.5, 0.5, 0, 0]).flat());
@@ -281,11 +290,16 @@ function main() {
     }
 
     const ellipseTexWidth = 20;
-    const ellpiseTexHight = 2;
-    const numEllipse = ellipseTexWidth * ellpiseTexHight;
+    const ellipseTexHeight = 20;
+    const numEllipse = ellipseTexWidth * ellipseTexHeight;
     const ellipsis_ids = new Array(numEllipse).fill(0).map((_, i) => i);
+    const ellipsisIdBuffer = gl.createBuffer(); 
+    gl.bindBuffer(gl.ARRAY_BUFFER, ellipsisIdBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ellipsis_ids), gl.DYNAMIC_DRAW);
     const ellipsis_position = new Float32Array(
-        ellipsis_ids.map(i => [0, 0, 0, 0]).flat());
+        ellipsis_ids.map(i => [i, 0, 0, 0]).flat());
+    const ellipsis_index = new Float32Array(
+        ellipsis_ids.map(i => [i, 0, 0, 0]).flat())
 
 
     const ellipseVertexBuffer = gl.createBuffer();
@@ -300,10 +314,10 @@ function main() {
     const positionTex1 = createTexture(gl, positions, particleTexWidth, particleTexHeight);
     
 
-    const ellipsisTex1 = createTexture(gl, ellipsis_position, ellipseTexWidth, ellpiseTexHight);
+    const ellipsisTex1 = createTexture(gl, ellipsis_position, ellipseTexWidth, ellipseTexHeight);
+    const indexTex = createTexture(gl, ellipsis_index, ellipseTexWidth, ellipseTexHeight);
 
     const TTex = createTexture(gl, tt_array, particleTexWidth, particleTexHeight);
-    const indexTex = createTexture(gl, t0_array, ellipseTexWidth, ellpiseTexHight);
 
     const albedoTex = createTexture(gl, albedo_array, particleTexWidth, particleTexHeight);
     const diameterTex = createTexture(gl, diameter_array, particleTexWidth, particleTexHeight);
@@ -389,17 +403,24 @@ function main() {
         gl.bindTexture(gl.TEXTURE_2D, nodeperiM0nTex);
         gl.activeTexture(gl.TEXTURE0 + 2);
         gl.bindTexture(gl.TEXTURE_2D, t0Tex);
+        //unused but bind anyways
+        gl.activeTexture(gl.TEXTURE0 + 3);
+        gl.bindTexture(gl.TEXTURE_2D, TTex);
+        gl.activeTexture(gl.TEXTURE0 + 4);
+        gl.bindTexture(gl.TEXTURE_2D, indexTex);
 
         gl.useProgram(updatePositionProgram);
         gl.uniform1i(updatePositionPrgLocs.eaqiTex, 0);  // tell the shader the position texture is on texture unit 0
-        gl.uniform1i(updatePositionPrgLocs.nodeTex, 1);  // tell the shader the position texture is on texture unit 1
+        gl.uniform1i(updatePositionPrgLocs.nodeperiM0nTex, 1);  // tell the shader the position texture is on texture unit 1
         gl.uniform1i(updatePositionPrgLocs.t0Tex, 2);  // tell the shader the position texture is on texture unit 1
+        gl.uniform1i(updatePositionPrgLocs.TTex, 3);
+        gl.uniform1i(updatePositionPrgLocs.indexTex, 4);
         gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
         gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate)));
-        gl.uniform2f(updatePositionPrgLocs.texIndexDimensions, 1, 0  );
-        gl.uniform1f(updatePositionPrgLocs.planetID, 1.0 );
-        gl.uniform1f(updatePositionPrgLocs.isEllipse, 0.0 );
+        gl.uniform2f(updatePositionPrgLocs.texIndexDimensions, ellipseTexWidth, ellipseTexHeight  );
+        gl.uniform2f(updatePositionPrgLocs.planetId, 1.0, 1.0);
+        gl.uniform1f(updatePositionPrgLocs.isEllipsis, 0.0 );
         //console.log("cameraRotation "+ cameraRotation + " cameraDistance " + cameraDistance );
         //gl.drawArrays(gl.TRIANGLES, 0, 6);  // draw 2 triangles (6 vertices)
         ext.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 6, 1);
@@ -413,7 +434,7 @@ function main() {
     {
         // render to the new positions
         gl.bindFramebuffer(gl.FRAMEBUFFER, ellipsisPositionInfo.fb);
-        gl.viewport(0, 0, ellipseTexWidth, ellpiseTexHight);
+        gl.viewport(0, 0, ellipseTexWidth, ellipseTexHeight);
 
         // setup our attributes to tell WebGL how to pull
         // the data from the buffer above to the position attribute
@@ -438,17 +459,23 @@ function main() {
         gl.bindTexture(gl.TEXTURE_2D, nodeperiM0nTex);
         gl.activeTexture(gl.TEXTURE0 + 2);
         gl.bindTexture(gl.TEXTURE_2D, t0Tex);
+        gl.activeTexture(gl.TEXTURE0 + 3);
+        gl.bindTexture(gl.TEXTURE_2D, TTex);
+        gl.activeTexture(gl.TEXTURE0 + 4);
+        gl.bindTexture(gl.TEXTURE_2D, indexTex);
 
         gl.useProgram(updatePositionProgram);
         gl.uniform1i(updatePositionPrgLocs.eaqiTex, 0);  // tell the shader the position texture is on texture unit 0
         gl.uniform1i(updatePositionPrgLocs.nodeperiM0nTex, 1);  // tell the shader the position texture is on texture unit 1
         gl.uniform1i(updatePositionPrgLocs.t0Tex, 2);  // tell the shader the position texture is on texture unit 1
+        gl.uniform1i(updatePositionPrgLocs.TTex, 3);
+        gl.uniform1i(updatePositionPrgLocs.indexTex, 4);
         gl.uniform2f(updatePositionPrgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform2f(updatePositionPrgLocs.canvasDimensions, gl.canvas.width, gl.canvas.height);
         gl.uniform1f(updatePositionPrgLocs.deltaTime, (toJulianDay(globalDate)));
-        gl.uniform2f(updatePositionPrgLocs.texIndexDimensions, 1, 0  );
-        gl.uniform1f(updatePositionPrgLocs.planetID, 1.0 );
-        gl.uniform1f(updatePositionPrgLocs.isEllipse, 1.0 );
+        gl.uniform2f(updatePositionPrgLocs.texIndexDimensions, ellipseTexWidth, ellipseTexHeight );
+        gl.uniform2f(updatePositionPrgLocs.planetId, 2.0 , 1.0 );
+        gl.uniform1f(updatePositionPrgLocs.isEllipsis, 1.0 );
 
 
         //console.log("cameraRotation "+ cameraRotation + " cameraDistance " + cameraDistance );
@@ -464,6 +491,7 @@ function main() {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
+        gl.useProgram(drawParticlesProgram);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, planetPositionInfo.tex);
         gl.activeTexture(gl.TEXTURE0 + 1);
@@ -471,19 +499,18 @@ function main() {
         gl.activeTexture(gl.TEXTURE0 + 2);
         gl.bindTexture(gl.TEXTURE_2D, diameterTex);
         
-        gl.useProgram(drawParticlesProgram);
         
         
         gl.bindBuffer(gl.ARRAY_BUFFER, planetVertexBuffer);
         gl.enableVertexAttribArray(drawParticlesProgLocs.a_position);
         gl.vertexAttribPointer(drawParticlesProgLocs.a_position, 3, gl.FLOAT, false, 0, 0);
-        //ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.a_position, 0);
+        ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.a_position, 0);
 
         gl.uniform2f(drawParticlesProgLocs.texDimensions, particleTexWidth, particleTexHeight);
         gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
         gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
-        gl.uniform1i(drawParticlesProgLocs.diameterTex, 2)
-        gl.uniform1f(drawParticlesProgLocs.isEllipsis, 0.0)
+        gl.uniform1i(drawParticlesProgLocs.diameterTex, 2);
+        gl.uniform1f(drawParticlesProgLocs.isEllipsis, 0.0);
         let transl = m4.translation(...[0, 0, cameraDistance]);
         
         let view = 
@@ -536,6 +563,7 @@ function main() {
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.useProgram(drawParticlesProgram);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, ellipsisPositionInfo.tex);
@@ -544,16 +572,17 @@ function main() {
         gl.activeTexture(gl.TEXTURE0 + 2);
         gl.bindTexture(gl.TEXTURE_2D, diameterTex);
         
-        gl.useProgram(drawParticlesProgram);
         
         gl.bindBuffer(gl.ARRAY_BUFFER, ellipseVertexBuffer);
         gl.enableVertexAttribArray(drawParticlesProgLocs.a_position);
         gl.vertexAttribPointer(drawParticlesProgLocs.a_position, 3, gl.FLOAT, false, 0, 0);
 
-        gl.uniform2f(drawParticlesProgLocs.texDimensions, ellipseTexWidth, ellpiseTexHight);
-        gl.uniform1i(drawParticlesProgLocs.ellipsisTex1, 0);  // tell the shader the position texture is on texture unit 0
+        gl.uniform2f(drawParticlesProgLocs.texDimensions, ellipseTexWidth, ellipseTexHeight);
+        gl.uniform1i(drawParticlesProgLocs.positionTex, 0);  // tell the shader the position texture is on texture unit 0
         gl.uniform1i(drawParticlesProgLocs.albedoTex, 1);
         gl.uniform1i(drawParticlesProgLocs.diameterTex, 2)
+        //gl.uniform2f(updatePositionPrgLocs.planetId, 2.0, 2.0  );
+        gl.uniform1f(drawParticlesProgLocs.isEllipsis, 1.0)
         let transl = m4.translation(...[0, 0, cameraDistance]);
         
         let view = 
@@ -577,7 +606,7 @@ function main() {
         );
         // setup our attributes to tell WebGL how to pull
         // the data from the buffer above to the id attribute
-        gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, ellipsisIdBuffer);
         gl.enableVertexAttribArray(drawParticlesProgLocs.id);
         gl.vertexAttribPointer(
             drawParticlesProgLocs.id,
@@ -587,10 +616,10 @@ function main() {
             0,         // stride (0 = auto)
             0,         // offset
         );
-        ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.id, 1);
+        ext.vertexAttribDivisorANGLE(drawParticlesProgLocs.id, 0);
 
         ext.drawArraysInstancedANGLE(
-            gl.POINTS,
+            gl.LINE_STRIP,
             0,             // offset
             numEllipse,   // num vertices per instance
             1,  // num instances

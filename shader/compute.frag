@@ -62,27 +62,41 @@ const computeFragmentShader =  `
     // shared texture dimensions
 
     // compute texcoord from gl_FragCoord;
-    vec2 texcoord = gl_FragCoord.xy / texDimensions;
+    vec2 planetTexCoord = vec2(0.0);
+    if(isEllipsis < 0.5){
+      planetTexCoord = gl_FragCoord.xy / texDimensions;
+    } else {
+      planetTexCoord = planetId / texDimensions;
+    }
+    vec2 indexTexCoord = gl_FragCoord.xy / texIndexDimensions;
 
-    float e = texture2D(eaqiTex, texcoord).x;
-    float a = texture2D(eaqiTex, texcoord).y;
-    float q = texture2D(eaqiTex, texcoord).z;
-    float i = texture2D(eaqiTex, texcoord).w;
-    float node = texture2D(nodeperiM0nTex, texcoord).x;
-    float peri = texture2D(nodeperiM0nTex, texcoord).y;
-    float M0 = texture2D(nodeperiM0nTex, texcoord).z;
-    float n = texture2D(nodeperiM0nTex, texcoord).w;
-    float t0 = texture2D(t0Tex, texcoord).x;
-    float T = texture2D(TTex, planetId).x;
-	  float index = texture2D(indexTex, texcoord).x;
+    float e = texture2D(eaqiTex, planetTexCoord).x;
+    float a = texture2D(eaqiTex, planetTexCoord).y;
+    float q = texture2D(eaqiTex, planetTexCoord).z;
+    float i = texture2D(eaqiTex, planetTexCoord).w;
+    float node = texture2D(nodeperiM0nTex, planetTexCoord).x;
+    float peri = texture2D(nodeperiM0nTex, planetTexCoord).y;
+    float M0 = texture2D(nodeperiM0nTex, planetTexCoord).z;
+    float n = texture2D(nodeperiM0nTex, planetTexCoord).w;
+    float t0 = texture2D(t0Tex, planetTexCoord).x;
+    float T = texture2D(TTex, planetTexCoord).x;
+	  float index = texture2D(indexTex, indexTexCoord).x;
 
-    vec3 pos = vec3(0.0);
+    vec3 pos = vec3(0.0);// vec3(planetId.xy, 0.0);
     if(isEllipsis < 0.5){
       //
       pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, deltaTime);
     } else {
       //ellipsis
-      pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, ((2460589.908218 + (T / texIndexDimensions.x * texIndexDimensions.y * index) - 2451545.0)/36525.0));
+      //pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, ((2460589.908218 + (T / (index) - 2451545.0) /36525.0)));
+      float yearPart = 0.0;
+      if(index != texIndexDimensions.x * texIndexDimensions.y){
+        yearPart = index / (texIndexDimensions.x * (texIndexDimensions.y-1.0));
+      } else {
+        yearPart = 0.0;
+      }
+      float date = (2440587.5 / 60000.0) + (T * yearPart);
+      pos = calculatePlanetPosition(e, a, q, i, node, peri, M0, n, t0, date) ;
     }
     gl_FragColor = vec4(pos, 1.0);
     }
